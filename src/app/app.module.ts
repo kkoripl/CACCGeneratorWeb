@@ -17,6 +17,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatTableModule} from "@angular/material/table";
 import { LeagueTableComponent } from './league-table/league-table.component';
 import { CardsCreatorComponent } from './cards-creator/cards-creator.component';
+import {MatSelectModule} from "@angular/material/select";
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -26,19 +28,21 @@ import { CardsCreatorComponent } from './cards-creator/cards-creator.component';
     LeagueTableComponent,
     CardsCreatorComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCardModule,
-    MatProgressBarModule,
-    MatTableModule
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatButtonModule,
+        MatCardModule,
+        MatProgressBarModule,
+        MatTableModule,
+        MatSelectModule,
+        FormsModule
 
-  ],
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

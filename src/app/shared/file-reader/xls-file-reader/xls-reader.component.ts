@@ -6,13 +6,11 @@ import { XlsFileReaderService} from "./xls-file-reader.service";
   templateUrl: './xls-reader.component.html',
   styleUrls: ['./xls-reader.component.css']
 })
-export class XlsReaderComponent implements OnInit{
+export class XlsReaderComponent implements OnInit {
 
   data: any[][];
 
-  constructor(private xlsReaderService: XlsFileReaderService) {
-
-  }
+  constructor(private xlsReaderService: XlsFileReaderService) {  }
 
   incomingFile(event) {
     this.xlsReaderService.incomingFile(event);

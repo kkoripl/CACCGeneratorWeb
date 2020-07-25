@@ -1,0 +1,82 @@
+<p>cards-creator works!</p>
+
+<mat-toolbar color="primary">
+  <input type="file" style="display: inline-block;" (change)="incomingFile($event)" placeholder="{{'uploadFilePlaceholder'}}" accept=".txt">
+  <button mat-button type="button" (click)="uploadFile()" i18n="@@uploadFile">Upload file</button>
+  <button mat-button type="button" (click)="addPlayer()"><mat-icon aria-label="Add">add</mat-icon>Add player</button>
+</mat-toolbar>
+
+<table mat-table [dataSource]="players">
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>Name</th>
+    <td mat-cell *matCellDef="let player">{{player.name}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="country">
+    <th mat-header-cell *matHeaderCellDef>Country</th>
+    <td mat-cell *matCellDef="let player">
+      <mat-select [(value)]="player.country">
+        <mat-option [value]="country" *ngFor="let country of countries">
+          {{country.name}}
+        </mat-option>
+      </mat-select>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="pace">
+    <th mat-header-cell *matHeaderCellDef>Pace</th>
+    <td mat-cell *matCellDef="let player">{{player.pace}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="dribbling">
+    <th mat-header-cell *matHeaderCellDef>Dribbling</th>
+    <td mat-cell *matCellDef="let player">{{player.dribbling}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="heading">
+    <th mat-header-cell *matHeaderCellDef>Heading</th>
+    <td mat-cell *matCellDef="let player">{{player.heading}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="highPass">
+    <th mat-header-cell *matHeaderCellDef>High Pass</th>
+    <td mat-cell *matCellDef="let player">{{player.highPass}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="resilience">
+    <th mat-header-cell *matHeaderCellDef>Resilience</th>
+    <td mat-cell *matCellDef="let player">{{player.resilience}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="shooting">
+    <th mat-header-cell *matHeaderCellDef>Shooting</th>
+    <td mat-cell *matCellDef="let player">{{player.shooting}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="tackling">
+    <th mat-header-cell *matHeaderCellDef>Tackling</th>
+    <td mat-cell *matCellDef="let player">{{player.tackling}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="saving">
+    <th mat-header-cell *matHeaderCellDef>Saving</th>
+    <td mat-cell *matCellDef="let player">{{player.saving}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="aerialAbility">
+    <th mat-header-cell *matHeaderCellDef>Aerial Ability</th>
+    <td mat-cell *matCellDef="let player">{{player.aerialAbility}}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let player">
+      <button mat-icon-button (click)="deletePlayer(player)" matTooltip="delete" class="iconbutton" color="warn">
+        <mat-icon aria-label="Delete">delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
