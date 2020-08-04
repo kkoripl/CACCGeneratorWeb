@@ -5,6 +5,8 @@ import {MatTableDataSource} from "@angular/material/table";
 import {Countries} from "../shared/enums/countries";
 import {Country} from "../shared/enums/country";
 import {CardsPainterService} from "./service/cards-painter.service";
+import {MatDialog} from "@angular/material/dialog";
+import {PlayerDialogComponent} from "../shared/dialogs/player-dialog/player-dialog.component";
 
 @Component({
   selector: 'app-cards-creator',
@@ -24,18 +26,18 @@ export class CardsCreatorComponent implements OnInit {
   countries: Country[] = Countries.all;
 
   constructor(private customCardsFileReaderService: CustomCardsFileReaderService,
-              private cardsPainter: CardsPainterService) { }
+              private cardsPainter: CardsPainterService,
+              private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.canvasCtx = this.canvas.nativeElement.getContext('2d');
   }
 
   drawCard(player: Player) {
-    console.log(player);
-    if (player.saving === undefined) {
-      this.cardsPainter.drawOutfielder(this.canvasCtx,player.name, player.country, player.getOutfielderSkills());
+    if (player.isGoalkeeper()) {
+      this.cardsPainter.drawGoalkeeper(this.canvasCtx, player);
     } else {
-      this.cardsPainter.drawGoalkeeper(this.canvasCtx,player.name, player.country, player.getGoalkeeperSkills());
+      this.cardsPainter.drawOutfielder(this.canvasCtx, player);
     }
   }
 
@@ -56,8 +58,35 @@ export class CardsCreatorComponent implements OnInit {
     this.players.data = playersInTable;
   }
 
-  addPlayer() {
-    var newPlayer = new Player("Test", "POL", 1, 2, 3, 4, 5, 6, 1, undefined, undefined);
+  openAddingPlayerDialog(data: any) {
+    data.player = new Player(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+    data.action = "Add player";
+    const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
+    dialogRef.afterClosed().subscribe(result => {
+      if(result.event != "Cancel") {
+        this.addPlayer(result.player);
+        this.drawCard(result.player);
+      }
+    });
+  }
+
+  openEditPlayerDialog(player: Player) {
+    let data = {player: null, action: null};
+    data.player = player;
+    data.action = "Edit player";
+    const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
+    dialogRef.afterClosed().subscribe(result => {
+      if(result.event != "Cancel") {
+        this.drawCard(result.player);
+      }
+    });
+  }
+
+  addPlayer(playerToAdd: any) {
+    var newPlayer = new Player(playerToAdd.name, playerToAdd.country, playerToAdd.pace,
+      playerToAdd.dribbling, playerToAdd.heading, playerToAdd.highPass, playerToAdd.resilience, playerToAdd.shooting,
+      playerToAdd.tackling, playerToAdd.saving, playerToAdd.aerialAbility);
+
     var playersInTable = this.players.data;
     playersInTable.push(newPlayer);
     this.players.data = playersInTable;

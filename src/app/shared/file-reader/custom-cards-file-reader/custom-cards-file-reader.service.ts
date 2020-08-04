@@ -3,6 +3,7 @@ import {Player} from "../../../entities/player/player";
 import {FileReaderService} from "../file-reader.service";
 import * as XLSX from "xlsx";
 import {CardFields} from "./cards-fields.enum";
+import {Countries} from "../../enums/countries";
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +44,7 @@ export class CustomCardsFileReaderService extends FileReaderService {
   buildPlayerObject(playerData: any): Player {
     if(this.isGoalkeeper(playerData)) {
       return new Player(playerData[CardFields.NAME],
-        playerData[CardFields.COUNTRY],
+        Countries.getCountryByAlpha3Code(playerData[CardFields.COUNTRY]),
         playerData[CardFields.PACE],
         playerData[CardFields.DRIBBLING],
         undefined,
@@ -55,7 +56,7 @@ export class CustomCardsFileReaderService extends FileReaderService {
         playerData[CardFields.AERIAL_ABILITY]);
     } else {
       return new Player(playerData[CardFields.NAME],
-        playerData[CardFields.COUNTRY],
+        Countries.getCountryByAlpha3Code(playerData[CardFields.COUNTRY]),
         playerData[CardFields.PACE],
         playerData[CardFields.DRIBBLING],
         playerData[CardFields.HEADING],

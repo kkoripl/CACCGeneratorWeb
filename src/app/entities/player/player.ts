@@ -1,9 +1,11 @@
 import {Country} from "../../shared/enums/country";
-import {Countries} from "../../shared/enums/countries";
+import {PlayerPosition} from "../../shared/enums/player-position";
 
 export class Player {
   name: string
   country: Country;
+
+  position: PlayerPosition;
 
   pace: number
   dribbling: number
@@ -16,15 +18,10 @@ export class Player {
   saving: number
   aerialAbility: number
 
-  // constructor(name: string, playerCountry: string) {
-  //   this.name = name;
-  //   this.country = Countries.getCountryByAlpha3Code(playerCountry);
-  // }
-
-  constructor(name: string, country: string, pace: number, dribbling: number, heading: number,
+  constructor(name: string, country: Country, pace: number, dribbling: number, heading: number,
               highPass: number, resilience: number, shooting: number, tackling: number, saving: number, aerialAbility: number) {
     this.name = name;
-    this.country = Countries.getCountryByAlpha3Code(country);
+    this.country = country;
     this.pace = pace;
     this.dribbling = dribbling;
     this.heading = heading;
@@ -34,6 +31,27 @@ export class Player {
     this.tackling = tackling;
     this.saving = saving;
     this.aerialAbility = aerialAbility;
+    if (this.isGoalkeeper()) {
+      this.position = PlayerPosition.GOALKEEPER
+    } else {
+      this.position = PlayerPosition.OUTFIELDER;
+    }
+  }
+
+  isGoalkeeper(): boolean {
+    return this.saving !== undefined && this.aerialAbility !== undefined;
+  }
+
+  clearPlayerSkills() {
+    this.pace = undefined;
+    this.dribbling = undefined;
+    this.heading = undefined;
+    this.highPass = undefined;
+    this.resilience = undefined;
+    this.shooting = undefined;
+    this.tackling = undefined;
+    this.saving = undefined;
+    this.aerialAbility = undefined;
   }
 
   getOutfielderSkills(): number[] {

@@ -3,7 +3,7 @@
 <mat-toolbar color="primary">
   <input type="file" style="display: inline-block;" (change)="incomingFile($event)" placeholder="{{'uploadFilePlaceholder'}}" accept=".txt">
   <button mat-button type="button" (click)="uploadFile()" i18n="@@uploadFile">Upload file</button>
-  <button mat-button type="button" (click)="addPlayer()"><mat-icon aria-label="Add">add</mat-icon>Add player</button>
+  <button mat-button type="button" (click)="openAddingPlayerDialog({})"><mat-icon aria-label="Add">add</mat-icon>Add player</button>
 </mat-toolbar>
 
 <table mat-table [dataSource]="players">
@@ -73,6 +73,9 @@
     <td mat-cell *matCellDef="let player">
       <button mat-icon-button (click)="deletePlayer(player)" matTooltip="delete" class="iconbutton" color="warn">
         <mat-icon aria-label="Delete">delete</mat-icon>
+      </button>
+      <button mat-icon-button (click)="openEditPlayerDialog(player)" matTooltip="edit" class="iconbutton" color="warn">
+        <mat-icon aria-label="Edit">edit</mat-icon>
       </button>
     </td>
   </ng-container>

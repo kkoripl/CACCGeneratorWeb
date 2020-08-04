@@ -1,59 +1,55 @@
 import {Injectable} from "@angular/core";
 import {GradePosition} from "../../shared/enums/grade-position.enum";
 import {Country} from "../../shared/enums/country";
+import {Player} from "../../entities/player/player";
+import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
+import {PlayerPosition} from "../../shared/enums/player-position";
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class CardsPainterService {
-  private outfielderCardName = "../assets/img/card_patterns/outfielder_real.png";
-  private goalkeeperCardName = "../assets/img/card_patterns/gk.png";
   private fontName = "Komika Axis";
-  private flagsDirectory = "../assets/img/flags";
-  private gradesDirectory = "../assets/img/grades";
-  private flagsExt = ".png";
-  private gradesExt = ".png";
 
   constructor(){}
 
-  drawOutfielder(ctx: CanvasRenderingContext2D, name: string, country: Country, skillGrades: number[]) {
-    console.log(country);
+  drawOutfielder(ctx: CanvasRenderingContext2D, player: Player) {
     let image = new Image();
-    image.onload = (e) => this.drawOutfielderImage(image, ctx, name, country, skillGrades);
-    image.src = this.outfielderCardName;
+    image.onload = (e) => this.drawOutfielderImage(image, ctx, player);
+    image.src = PathsGeneratorService.generateCardPath(PlayerPosition.OUTFIELDER.valueOf());
   }
 
-  drawGoalkeeper(ctx: CanvasRenderingContext2D, name: string, country: Country, skillGrades: number[]) {
+  drawGoalkeeper(ctx: CanvasRenderingContext2D, player: Player) {
     let image = new Image();
-    image.onload = (e) => this.drawGoalkeeperImage(image, ctx, name, country, skillGrades);
-    image.src = this.goalkeeperCardName;
+    image.onload = (e) => this.drawGoalkeeperImage(image, ctx, player);
+    image.src = PathsGeneratorService.generateCardPath(PlayerPosition.GOALKEEPER.valueOf());
   }
 
-  private drawOutfielderImage(img, ctx: CanvasRenderingContext2D, name: string, country: Country, skillGrades: number[]) {
+  private drawOutfielderImage(img, ctx: CanvasRenderingContext2D, player: Player) {
     ctx.drawImage(img, 0,0, img.width, img.height);
-    this.drawOutfielderElements(ctx, name, country, skillGrades);
+    this.drawOutfielderElements(ctx, player);
   }
 
-  private drawGoalkeeperImage(img, ctx: CanvasRenderingContext2D, name: string, country: Country, skillGrades: number[]) {
+  private drawGoalkeeperImage(img, ctx: CanvasRenderingContext2D, player: Player) {
     ctx.drawImage(img, 0,0, img.width, img.height);
-    this.drawOutfielderElements(ctx, name, country, skillGrades);
+    this.drawGoalkeeperElements(ctx, player);
   }
 
-  private drawOutfielderElements(ctx: CanvasRenderingContext2D, name: string, country: Country, skillGrades: number[]) {
-    this.drawPlayerElements(ctx, name, country);
-    this.drawOutfielderSkills(ctx, skillGrades);
+  private drawOutfielderElements(ctx: CanvasRenderingContext2D, player: Player) {
+    this.drawPlayerElements(ctx, player);
+    this.drawOutfielderSkills(ctx, player.getOutfielderSkills());
   }
 
-  private drawGoalkeeperElements(ctx: CanvasRenderingContext2D, name: string, country: Country, skillGrades: number[]) {
-    this.drawPlayerElements(ctx, name, country);
-    this.drawGoalkeeperSkills(ctx, skillGrades);
+  private drawGoalkeeperElements(ctx: CanvasRenderingContext2D, player: Player) {
+    this.drawPlayerElements(ctx, player);
+    this.drawGoalkeeperSkills(ctx, player.getGoalkeeperSkills());
   }
 
-  private drawPlayerElements(ctx: CanvasRenderingContext2D, name: string, country: Country) {
-    this.drawPlayerName(ctx, name);
-    this.drawCountryFlag(ctx, country);
-    this.drawCountryName(ctx, country);
+  private drawPlayerElements(ctx: CanvasRenderingContext2D, player: Player) {
+    this.drawPlayerName(ctx, player.name);
+    this.drawCountryFlag(ctx, player.country);
+    this.drawCountryName(ctx, player.country);
   }
 
   private drawPlayerName(ctx: CanvasRenderingContext2D, name: string) {
@@ -63,7 +59,7 @@ export class CardsPainterService {
 
   private drawCountryFlag(ctx: CanvasRenderingContext2D, country: Country) {
     let image = new Image();
-    image.src = this.generateFlagPath(country.alpha2code);
+    image.src = PathsGeneratorService.generateFlagPath(country.alpha2code);
     image.onload = function() {
       var img = <HTMLImageElement> this;
       ctx.drawImage(img, 26,43, 29, 29);
@@ -86,25 +82,21 @@ export class CardsPainterService {
   }
 
   private drawGoalkeeperSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
-
+    this.drawGrade(ctx, skillGrades[0], GradePosition.ONE);
+    this.drawGrade(ctx, skillGrades[1], GradePosition.TWO);
+    this.drawGrade(ctx, skillGrades[2], GradePosition.THREE);
+    this.drawGrade(ctx, skillGrades[3], GradePosition.FOUR);
+    this.drawGrade(ctx, skillGrades[4], GradePosition.FIVE);
   }
 
 
   private drawGrade(ctx: CanvasRenderingContext2D, grade: number, gradePosition: GradePosition) {
     let image = new Image();
-    image.src = this.generateGradesPath(grade);
+    image.src = PathsGeneratorService.generateGradesPath(grade);
     image.onload = function() {
       var img = <HTMLImageElement> this;
       ctx.drawImage(img, 120, gradePosition.cordinateY, img.width, img.height);
     }
-  }
-
-  private generateFlagPath(country: string) {
-    return this.flagsDirectory + "/" + country + this.flagsExt;
-  }
-
-  private generateGradesPath(grade: number) {
-    return this.gradesDirectory + "/" + grade + this.gradesExt;
   }
 
   private createFont(size: number, fontName: string) {
