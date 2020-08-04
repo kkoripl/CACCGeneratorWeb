@@ -1,6 +1,11 @@
 import {Country} from "./country";
 
 export class Countries {
+
+  private static hasSameName = (country: Country, seekenName: string) => {return country.name == seekenName}
+  private static hasSameAlpha2Code = (country: Country, seekenCode: string) => {return country.alpha2code == seekenCode}
+  private static hasSameAlpha3Code = (country: Country, seekenCode: string) => {return country.alpha3code == seekenCode}
+
   static readonly all: Country[] = [
     Country.AFGHANISTAN,
     Country.ALBANIA,
@@ -262,7 +267,7 @@ export class Countries {
     Country.CZECHOSLOVAKIA
   ];
 
-  static readonly  historic = [
+  static readonly historic = [
     Country.EAST_GERMANY,
     Country.WEST_GERMANY,
     Country.USSR,
@@ -277,4 +282,16 @@ export class Countries {
     Country.BASQUE_CTRY,
     Country.C_I_S
   ]
+
+  static getCountryByName(name: string): Country {
+    return Countries.all.find(country => this.hasSameName(country, name));
+  }
+
+  static getCountryByAlpha2Code(code: string): Country {
+    return Countries.all.find(country => this.hasSameAlpha2Code(country, code));
+  }
+
+  static getCountryByAlpha3Code(code: string): Country {
+    return Countries.all.find(country => this.hasSameAlpha3Code(country, code));
+  }
 }

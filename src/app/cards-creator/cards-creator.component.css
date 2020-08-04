@@ -1,3 +1,9 @@
+@import '../../assets/fonts/komikaaxis.css';
+
 table {
   width: 100%;
+}
+
+canvas {
+  border-style: solid;
 }
