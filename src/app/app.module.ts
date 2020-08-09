@@ -18,11 +18,12 @@ import {MatTableModule} from "@angular/material/table";
 import {LeagueTableComponent} from './league-table/league-table.component';
 import {CardsCreatorComponent} from './cards-creator/cards-creator.component';
 import {MatSelectModule} from "@angular/material/select";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {PlayerDialogComponent} from "./shared/dialogs/player-dialog/player-dialog.component";
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatInputModule} from "@angular/material/input";
 import {MatRadioModule} from "@angular/material/radio";
+import {UploadPlayersDialogComponent} from "./shared/dialogs/upload-players-dialog/upload-players-dialog.component";
 
 @NgModule({
   declarations: [
@@ -31,25 +32,27 @@ import {MatRadioModule} from "@angular/material/radio";
     MatchFileReaderComponent,
     LeagueTableComponent,
     CardsCreatorComponent,
-    PlayerDialogComponent
+    PlayerDialogComponent,
+    UploadPlayersDialogComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCardModule,
-    MatDialogModule,
-    MatProgressBarModule,
-    MatInputModule,
-    MatTableModule,
-    MatSelectModule,
-    FormsModule,
-    MatRadioModule
-  ],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatButtonModule,
+        MatCardModule,
+        MatDialogModule,
+        MatProgressBarModule,
+        MatInputModule,
+        MatTableModule,
+        MatSelectModule,
+        FormsModule,
+        MatRadioModule,
+        ReactiveFormsModule
+    ],
   providers: [],
   bootstrap: [AppComponent]
 })

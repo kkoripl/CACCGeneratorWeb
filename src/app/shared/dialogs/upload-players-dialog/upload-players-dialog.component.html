@@ -1,0 +1,17 @@
+<h1 mat-dialog-title><strong>Upload players file</strong></h1>
+<div [formGroup]="countryForm">
+  <div>
+    <mat-radio-group aria-label="Player position" formControlName="countryCoding">
+      <mat-radio-button value="{{CountryNameCodes.NAME}}">{{CountryNameCodes.NAME.valueOf()}}</mat-radio-button>
+      <mat-radio-button value="{{CountryNameCodes.ALPHA2CODE}}">{{CountryNameCodes.ALPHA2CODE.valueOf()}}</mat-radio-button>
+      <mat-radio-button value="{{CountryNameCodes.ALPHA3CODE}}">{{CountryNameCodes.ALPHA3CODE.valueOf()}}</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  <div>
+    <input type="file" style="display: inline-block;" (change)="incomingFile($event)" placeholder="{{'uploadFilePlaceholder'}}" accept=".txt" [disabled]="!countryForm.valid">
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button type="submit" [disabled]="!fileWasChoosen()" (click)="uploadFile(countryForm.value.countryCoding)">Upload file</button>
+    <button mat-button (click)="closeDialog()" mat-flat-button color="warn">Cancel</button>
+  </div>
+</div>

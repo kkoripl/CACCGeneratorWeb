@@ -4,6 +4,8 @@ import {FileReaderService} from "../file-reader.service";
 import * as XLSX from "xlsx";
 import {CardFields} from "./cards-fields.enum";
 import {Countries} from "../../enums/countries";
+import {PlayerPosition} from "../../enums/player-position";
+import {CountryNameCodes} from "../../enums/country-name-codes";
 
 @Injectable({
   providedIn: 'root'
@@ -19,10 +21,10 @@ export class CustomCardsFileReaderService extends FileReaderService {
     super();
   }
 
-  uploadFile() {
+  uploadFile(countryCoding: CountryNameCodes) {
     return new Promise((resolve, reject) => {
       this.fileReader.onload = (e) => {
-        this.readPlayersDataFromXls(this.fileReader.result);
+        this.readPlayersDataFromXls(this.fileReader.result, countryCoding);
         resolve(this.fileReader.result);
       };
 
@@ -30,21 +32,22 @@ export class CustomCardsFileReaderService extends FileReaderService {
     });
   }
 
-  readPlayersDataFromXls(data) {
+  readPlayersDataFromXls(data, countryCoding: CountryNameCodes) {
     var workbook = XLSX.read(data, {
       type: 'binary'
     });
 
     var playersData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{header: -1});
     for (const playerData of playersData) {
-      this.players.push(this.buildPlayerObject(playerData));
+      this.players.push(this.buildPlayerObject(playerData, countryCoding));
     }
   }
 
-  buildPlayerObject(playerData: any): Player {
+  buildPlayerObject(playerData: any, countryCoding: CountryNameCodes): Player {
     if(this.isGoalkeeper(playerData)) {
       return new Player(playerData[CardFields.NAME],
-        Countries.getCountryByAlpha3Code(playerData[CardFields.COUNTRY]),
+        Countries.getCountryBy(playerData[CardFields.COUNTRY], countryCoding),
+        PlayerPosition.GOALKEEPER,
         playerData[CardFields.PACE],
         playerData[CardFields.DRIBBLING],
         undefined,
@@ -56,7 +59,8 @@ export class CustomCardsFileReaderService extends FileReaderService {
         playerData[CardFields.AERIAL_ABILITY]);
     } else {
       return new Player(playerData[CardFields.NAME],
-        Countries.getCountryByAlpha3Code(playerData[CardFields.COUNTRY]),
+        Countries.getCountryBy(playerData[CardFields.COUNTRY], countryCoding),
+        PlayerPosition.OUTFIELDER,
         playerData[CardFields.PACE],
         playerData[CardFields.DRIBBLING],
         playerData[CardFields.HEADING],

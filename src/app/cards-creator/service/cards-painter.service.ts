@@ -14,13 +14,21 @@ export class CardsPainterService {
 
   constructor(){}
 
-  drawOutfielder(ctx: CanvasRenderingContext2D, player: Player) {
+  drawCard(ctx: CanvasRenderingContext2D, player: Player) {
+    if (player.isGoalkeeper()) {
+      this.drawGoalkeeper(ctx, player);
+    } else {
+      this.drawOutfielder(ctx, player);
+    }
+  }
+
+  private drawOutfielder(ctx: CanvasRenderingContext2D, player: Player) {
     let image = new Image();
     image.onload = (e) => this.drawOutfielderImage(image, ctx, player);
     image.src = PathsGeneratorService.generateCardPath(PlayerPosition.OUTFIELDER.valueOf());
   }
 
-  drawGoalkeeper(ctx: CanvasRenderingContext2D, player: Player) {
+  private drawGoalkeeper(ctx: CanvasRenderingContext2D, player: Player) {
     let image = new Image();
     image.onload = (e) => this.drawGoalkeeperImage(image, ctx, player);
     image.src = PathsGeneratorService.generateCardPath(PlayerPosition.GOALKEEPER.valueOf());

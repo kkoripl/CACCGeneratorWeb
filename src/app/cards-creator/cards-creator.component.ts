@@ -7,6 +7,9 @@ import {Country} from "../shared/enums/country";
 import {CardsPainterService} from "./service/cards-painter.service";
 import {MatDialog} from "@angular/material/dialog";
 import {PlayerDialogComponent} from "../shared/dialogs/player-dialog/player-dialog.component";
+import {PlayerPosition} from "../shared/enums/player-position";
+import {CardsPdfGeneratorService} from "./service/cards-pdf-generator.service";
+import {UploadPlayersDialogComponent} from "../shared/dialogs/upload-players-dialog/upload-players-dialog.component";
 
 @Component({
   selector: 'app-cards-creator',
@@ -15,18 +18,19 @@ import {PlayerDialogComponent} from "../shared/dialogs/player-dialog/player-dial
 })
 export class CardsCreatorComponent implements OnInit {
 
-  @ViewChild('canvas', { static: true })
-  canvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   private canvasCtx: CanvasRenderingContext2D;
 
   displayedColumns: string[] = ['name', 'country', 'pace', 'dribbling', 'heading', 'highPass', 'resilience', 'shooting',
     'tackling', 'saving', 'aerialAbility', 'actions'];
 
   players = new MatTableDataSource;
+  data: Player[] = [];
   countries: Country[] = Countries.all;
 
   constructor(private customCardsFileReaderService: CustomCardsFileReaderService,
               private cardsPainter: CardsPainterService,
+              private cardPdfGenerator: CardsPdfGeneratorService,
               private dialog: MatDialog) { }
 
   ngOnInit(): void {
@@ -34,38 +38,53 @@ export class CardsCreatorComponent implements OnInit {
   }
 
   drawCard(player: Player) {
-    if (player.isGoalkeeper()) {
-      this.cardsPainter.drawGoalkeeper(this.canvasCtx, player);
-    } else {
-      this.cardsPainter.drawOutfielder(this.canvasCtx, player);
-    }
+    this.cardsPainter.drawCard(this.canvasCtx, player);
   }
 
-  incomingFile(event) {
-    this.customCardsFileReaderService.incomingFile(event);
-  }
+  // incomingFile(event) {
+  //   this.customCardsFileReaderService.incomingFile(event);
+  // }
+  //
+  // uploadFile(){
+  //   this.customCardsFileReaderService.uploadFile().then(() => {
+  //     this.data = this.customCardsFileReaderService.players
+  //     this.players.data = this.data;
+  //   });
+  // }
 
-  uploadFile(){
-    this.customCardsFileReaderService.uploadFile().then(() => {
-      this.players.data = this.customCardsFileReaderService.players;
-    });
+  generatePdf() {
+    console.log(this.data);
+    console.log(this.players.data);
+    this.cardPdfGenerator.generatePdf(this.data, this.canvasCtx);
   }
 
   deletePlayer(playerToDelete: Player) {
-    var playersInTable = this.players.data;
-    const playerToDeleteIdx = this.players.data.findIndex(player => player === playerToDelete);
-    playersInTable.splice(playerToDeleteIdx, 1);
-    this.players.data = playersInTable;
+    // var playersInTable = this.data;
+    const playerToDeleteIdx = this.data.findIndex(player => player === playerToDelete);
+    this.data.splice(playerToDeleteIdx, 1);
+    this.players.data = this.data;
+  }
+
+  openUploadFileDialog() {
+    const dialogRef = this.dialog.open(UploadPlayersDialogComponent, {});
+    dialogRef.afterClosed().subscribe(result => {
+      if(result.players != null) {
+            this.data = result.players;
+            console.log(this.data);
+            this.players.data = this.data;
+      }
+    })
   }
 
   openAddingPlayerDialog(data: any) {
-    data.player = new Player(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+    data.player = new Player(undefined, undefined, PlayerPosition.GOALKEEPER, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     data.action = "Add player";
     const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
     dialogRef.afterClosed().subscribe(result => {
-      if(result.event != "Cancel") {
-        this.addPlayer(result.player);
-        this.drawCard(result.player);
+      if(result.event != undefined) {
+        data.player.updatePlayer(result.player);
+        this.addPlayer(data.player);
+        this.drawCard(data.player);
       }
     });
   }
@@ -76,19 +95,20 @@ export class CardsCreatorComponent implements OnInit {
     data.action = "Edit player";
     const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
     dialogRef.afterClosed().subscribe(result => {
-      if(result.event != "Cancel") {
-        this.drawCard(result.player);
+      if(result != undefined) {
+        player.updatePlayer(result.player);
+        this.drawCard(player);
       }
     });
   }
 
   addPlayer(playerToAdd: any) {
-    var newPlayer = new Player(playerToAdd.name, playerToAdd.country, playerToAdd.pace,
+    var newPlayer = new Player(playerToAdd.name, playerToAdd.country, playerToAdd.position, playerToAdd.pace,
       playerToAdd.dribbling, playerToAdd.heading, playerToAdd.highPass, playerToAdd.resilience, playerToAdd.shooting,
       playerToAdd.tackling, playerToAdd.saving, playerToAdd.aerialAbility);
 
-    var playersInTable = this.players.data;
-    playersInTable.push(newPlayer);
-    this.players.data = playersInTable;
+    // var playersInTable = this.players.data;
+    this.data.push(newPlayer);
+    this.players.data = this.data;
   }
 }

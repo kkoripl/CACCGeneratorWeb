@@ -1,69 +1,74 @@
 <h1 mat-dialog-title><strong>{{action}}</strong></h1>
-<div mat-dialog-content>
-  <div>
-    <mat-label>Player position: </mat-label>
-    <mat-radio-group aria-label="Player position" (change)="handlePositionChange()" [(ngModel)]="player.position">
-      <mat-radio-button value="goalkeeper">Goalkeeper</mat-radio-button>
-      <mat-radio-button value="outfielder">Outfielder</mat-radio-button>
-    </mat-radio-group>
+<div mat-dialog-content [formGroup]="playerForm">
+  <div formGroupName="{{PlayerAttributeGroups.GENERAL.valueOf()}}">
+    <div>
+      <mat-label>Player position: </mat-label>
+      <mat-radio-group aria-label="Player position" (change)="handlePositionChange()" formControlName="position">
+        <mat-radio-button value="{{PlayerPosition.GOALKEEPER}}">Goalkeeper</mat-radio-button>
+        <mat-radio-button value="{{PlayerPosition.OUTFIELDER}}">Outfielder</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div>
+      <mat-form-field>
+        <input type="text" placeholder="Name" matInput formControlName="name">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Country</mat-label>
+        <mat-select formControlName="country">
+          <mat-option [value]="country" *ngFor="let country of countries">
+            {{country.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </div>
-  <div>
-    <mat-form-field>
-      <input placeholder="Name" matInput [(ngModel)]="player.name">
-    </mat-form-field>
-    <mat-form-field>
-      <mat-label>Country</mat-label>
-      <mat-select [(value)]="player.country">
-        <mat-option [value]="country" *ngFor="let country of countries">
-          {{country.name}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+  <div *ngIf="playerIsOutfielder(); else gkTemplate">
+    <div>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GENERAL.valueOf()}}">
+        <input placeholder="Pace" matInput type="number" min="1" max="6" formControlName="pace">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GENERAL.valueOf()}}">
+        <input placeholder="Dribbling" matInput type="number" min="1" max="6" formControlName="dribbling">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.OUTFIELDER.valueOf()}}">
+        <input placeholder="Heading" matInput type="number" min="1" max="6" formControlName="heading">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.OUTFIELDER.valueOf()}}">
+        <input placeholder="High pass" matInput type="number" min="1" max="6" formControlName="highPass">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GENERAL.valueOf()}}">
+        <input placeholder="Resilience" matInput type="number" min="1" max="6" formControlName="resilience">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.OUTFIELDER.valueOf()}}">
+        <input placeholder="Shooting" matInput type="number" min="1" max="6" formControlName="shooting">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.OUTFIELDER.valueOf()}}">
+        <input placeholder="Tackling" matInput type="number" min="1" max="6" formControlName="tackling">
+      </mat-form-field>
+    </div>
   </div>
-  <div *ngIf="player.position === 'outfielder'; else gkTemplate">
-    <mat-form-field>
-      <input placeholder="Pace" matInput type="number" min="1" max="6" [(ngModel)]="player.pace">
-    </mat-form-field>
-    <mat-form-field>
-      <input placeholder="Dribbling" matInput type="number" min="1" max="6" [(ngModel)]="player.dribbling">
-    </mat-form-field>
-    <mat-form-field>
-      <input placeholder="Heading" matInput type="number" min="1" max="6" [(ngModel)]="player.heading">
-    </mat-form-field>
-    <mat-form-field>
-      <input placeholder="High pass" matInput type="number" min="1" max="6" [(ngModel)]="player.highPass">
-    </mat-form-field>
-    <mat-form-field>
-      <input placeholder="Resilience" matInput type="number" min="1" max="6" [(ngModel)]="player.resilience">
-    </mat-form-field>
-    <mat-form-field>
-      <input placeholder="Shooting" matInput type="number" min="1" max="6" [(ngModel)]="player.shooting">
-    </mat-form-field>
-    <mat-form-field>
-      <input placeholder="Tackling" matInput type="number" min="1" max="6" [(ngModel)]="player.tackling">
-    </mat-form-field>
-  </div>
+  <ng-template #gkTemplate>
+    <div>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GOALKEEPER.valueOf()}}">
+        <input placeholder="Aerial ability" matInput type="number" min="1" max="6" formControlName="aerialAbility">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GENERAL.valueOf()}}">
+        <input placeholder="Dribbling" matInput type="number" min="1" max="6" formControlName="dribbling">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GENERAL.valueOf()}}">
+        <input placeholder="Pace" matInput type="number" min="1" max="6" formControlName="pace">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GENERAL.valueOf()}}">
+        <input placeholder="Resilience" matInput type="number" min="1" max="6" formControlName="resilience">
+      </mat-form-field>
+      <mat-form-field formGroupName="{{PlayerAttributeGroups.GOALKEEPER.valueOf()}}">
+        <input placeholder="Saving" matInput type="number" min="1" max="6" formControlName="saving">
+      </mat-form-field>
+    </div>
+  </ng-template>
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button (click)="doAction()">{{action}}</button>
+  <button mat-button type="submit" [disabled]="!validPlayerData()" (click)="doAction()">{{action}}</button>
   <button mat-button (click)="closeDialog()" mat-flat-button color="warn">Cancel</button>
 </div>
-
-<ng-template #gkTemplate>
-  <mat-form-field>
-    <input placeholder="Aerial ability" matInput type="number" min="1" max="6" [(ngModel)]="player.aerialAbility">
-  </mat-form-field>
-  <mat-form-field>
-    <input placeholder="Dribbling" matInput type="number" min="1" max="6" [(ngModel)]="player.dribbling">
-  </mat-form-field>
-  <mat-form-field>
-    <input placeholder="Pace" matInput type="number" min="1" max="6" [(ngModel)]="player.pace">
-  </mat-form-field>
-  <mat-form-field>
-    <input placeholder="Resilience" matInput type="number" min="1" max="6" [(ngModel)]="player.resilience">
-  </mat-form-field>
-  <mat-form-field>
-    <input placeholder="Saving" matInput type="number" min="1" max="6" [(ngModel)]="player.saving">
-  </mat-form-field>
-</ng-template>

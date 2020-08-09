@@ -18,7 +18,7 @@ export class Player {
   saving: number
   aerialAbility: number
 
-  constructor(name: string, country: Country, pace: number, dribbling: number, heading: number,
+  constructor(name: string, country: Country, position: PlayerPosition, pace: number, dribbling: number, heading: number,
               highPass: number, resilience: number, shooting: number, tackling: number, saving: number, aerialAbility: number) {
     this.name = name;
     this.country = country;
@@ -31,15 +31,27 @@ export class Player {
     this.tackling = tackling;
     this.saving = saving;
     this.aerialAbility = aerialAbility;
-    if (this.isGoalkeeper()) {
-      this.position = PlayerPosition.GOALKEEPER
-    } else {
-      this.position = PlayerPosition.OUTFIELDER;
-    }
+    this.position = position;
+
+  }
+
+  updatePlayer(player) {
+    this.name = player.general.name;
+    this.country = player.general.country;
+    this.pace = player.general.pace;
+    this.dribbling = player.general.dribbling;
+    this.heading = player.outfielder.heading;
+    this.highPass = player.outfielder.highPass;
+    this.resilience = player.general.resilience;
+    this.shooting = player.outfielder.shooting;
+    this.tackling = player.outfielder.tackling;
+    this.saving = player.goalkeeper.saving;
+    this.aerialAbility = player.goalkeeper.aerialAbility;
+    this.position = player.general.position;
   }
 
   isGoalkeeper(): boolean {
-    return this.saving !== undefined && this.aerialAbility !== undefined;
+    return this.position === PlayerPosition.GOALKEEPER.valueOf();
   }
 
   clearPlayerSkills() {

@@ -1,4 +1,5 @@
 import {Country} from "./country";
+import {CountryNameCodes} from "./country-name-codes";
 
 export class Countries {
 
@@ -283,15 +284,29 @@ export class Countries {
     Country.C_I_S
   ]
 
-  static getCountryByName(name: string): Country {
+  static getCountryBy(value: string, countryCoding: CountryNameCodes): Country {
+    switch(countryCoding) {
+      case CountryNameCodes.NAME: {
+        return Countries.getCountryByName(value);
+      }
+      case CountryNameCodes.ALPHA2CODE: {
+        return Countries.getCountryByAlpha2Code(value);
+      }
+      case CountryNameCodes.ALPHA3CODE: {
+        return Countries.getCountryByAlpha3Code(value);
+      }
+    }
+  }
+
+  private static getCountryByName(name: string): Country {
     return Countries.all.find(country => this.hasSameName(country, name));
   }
 
-  static getCountryByAlpha2Code(code: string): Country {
+  private static getCountryByAlpha2Code(code: string): Country {
     return Countries.all.find(country => this.hasSameAlpha2Code(country, code));
   }
 
-  static getCountryByAlpha3Code(code: string): Country {
+  private static getCountryByAlpha3Code(code: string): Country {
     return Countries.all.find(country => this.hasSameAlpha3Code(country, code));
   }
 }
