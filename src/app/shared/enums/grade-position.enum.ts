@@ -7,11 +7,16 @@ export class GradePosition {
   public static SIX = new GradePosition(6, 176);
   public static SEVEN = new GradePosition(7, 196);
 
+  private static ALL = [GradePosition.ONE, GradePosition.TWO, GradePosition.THREE, GradePosition.FOUR, GradePosition.FIVE, GradePosition.SIX, GradePosition.SEVEN];
   orderNo: number;
   cordinateY: number;
 
   private constructor(orderNo: number, cordinateY: number) {
     this.orderNo = orderNo;
     this.cordinateY = cordinateY;
+  }
+
+  public static getGradePositionByOrder(orderNo: number) {
+    return GradePosition.ALL.find(position => position.orderNo === orderNo);
   }
 }

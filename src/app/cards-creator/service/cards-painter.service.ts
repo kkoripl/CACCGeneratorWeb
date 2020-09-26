@@ -3,7 +3,6 @@ import {GradePosition} from "../../shared/enums/grade-position.enum";
 import {Country} from "../../shared/enums/country";
 import {Player} from "../../entities/player/player";
 import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
-import {PlayerPosition} from "../../shared/enums/player-position";
 
 @Injectable({
   providedIn: 'root'
@@ -11,53 +10,62 @@ import {PlayerPosition} from "../../shared/enums/player-position";
 
 export class CardsPainterService {
   private fontName = "Komika Axis";
+  private gkSkillsNo = 5;
+  private outfilederSkillsNo = 7;
 
   constructor(){}
 
-  drawCard(ctx: CanvasRenderingContext2D, player: Player) {
-    if (player.isGoalkeeper()) {
-      this.drawGoalkeeper(ctx, player);
-    } else {
-      this.drawOutfielder(ctx, player);
-    }
+  async drawCard(ctx: CanvasRenderingContext2D, player: Player) {
+    var drawPromise = new Promise(resolve => {
+      if (player.isGoalkeeper()) {
+        this.drawGoalkeeper(ctx, player, resolve);
+      } else {
+        this.drawOutfielder(ctx, player, resolve);
+      }
+    })
+    await drawPromise;
   }
 
-  private drawOutfielder(ctx: CanvasRenderingContext2D, player: Player) {
+  private drawOutfielder(ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
     let image = new Image();
-    image.onload = (e) => this.drawOutfielderImage(image, ctx, player);
-    image.src = PathsGeneratorService.generateCardPath(PlayerPosition.OUTFIELDER.valueOf());
+    image.onload = (e) => this.drawOutfielderImage(image, ctx, player, resolveCallback);
+    image.src = PathsGeneratorService.generateOutfielderCardPath();
   }
 
-  private drawGoalkeeper(ctx: CanvasRenderingContext2D, player: Player) {
+  private drawGoalkeeper(ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
     let image = new Image();
-    image.onload = (e) => this.drawGoalkeeperImage(image, ctx, player);
-    image.src = PathsGeneratorService.generateCardPath(PlayerPosition.GOALKEEPER.valueOf());
+    image.onload = (e) => this.drawGoalkeeperImage(image, ctx, player, resolveCallback);
+    image.src = PathsGeneratorService.generateGoalkeeperCardPath();
   }
 
-  private drawOutfielderImage(img, ctx: CanvasRenderingContext2D, player: Player) {
-    ctx.drawImage(img, 0,0, img.width, img.height);
-    this.drawOutfielderElements(ctx, player);
+  private async drawOutfielderImage(img, ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    await this.drawOutfielderElements(ctx, player);
+    resolveCallback();
   }
 
-  private drawGoalkeeperImage(img, ctx: CanvasRenderingContext2D, player: Player) {
-    ctx.drawImage(img, 0,0, img.width, img.height);
-    this.drawGoalkeeperElements(ctx, player);
+  private async drawGoalkeeperImage(img, ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+    await this.drawGoalkeeperElements(ctx, player);
+    resolveCallback();
   }
 
-  private drawOutfielderElements(ctx: CanvasRenderingContext2D, player: Player) {
-    this.drawPlayerElements(ctx, player);
-    this.drawOutfielderSkills(ctx, player.getOutfielderSkills());
+  private async drawOutfielderElements(ctx: CanvasRenderingContext2D, player: Player) {
+    await this.drawPlayerElements(ctx, player);
+    await this.drawOutfielderSkills(ctx, player.getOutfielderSkills());
   }
 
-  private drawGoalkeeperElements(ctx: CanvasRenderingContext2D, player: Player) {
-    this.drawPlayerElements(ctx, player);
-    this.drawGoalkeeperSkills(ctx, player.getGoalkeeperSkills());
+  private async drawGoalkeeperElements(ctx: CanvasRenderingContext2D, player: Player) {
+    await this.drawPlayerElements(ctx, player);
+    await this.drawGoalkeeperSkills(ctx, player.getGoalkeeperSkills());
   }
 
-  private drawPlayerElements(ctx: CanvasRenderingContext2D, player: Player) {
+  private async drawPlayerElements(ctx: CanvasRenderingContext2D, player: Player) {
     this.drawPlayerName(ctx, player.name);
-    this.drawCountryFlag(ctx, player.country);
     this.drawCountryName(ctx, player.country);
+    await new Promise(resolve => {
+      this.drawCountryFlag(ctx, player.country, resolve)
+    });
   }
 
   private drawPlayerName(ctx: CanvasRenderingContext2D, name: string) {
@@ -65,12 +73,13 @@ export class CardsPainterService {
     ctx.fillText(name,27, 40);
   }
 
-  private drawCountryFlag(ctx: CanvasRenderingContext2D, country: Country) {
+  private drawCountryFlag(ctx: CanvasRenderingContext2D, country: Country, resolveCallback: any) {
     let image = new Image();
     image.src = PathsGeneratorService.generateFlagPath(country.alpha2code);
     image.onload = function() {
       var img = <HTMLImageElement> this;
       ctx.drawImage(img, 26,43, 29, 29);
+      resolveCallback();
     }
   }
 
@@ -79,31 +88,31 @@ export class CardsPainterService {
     ctx.fillText(country.name,58, 62);
   }
 
-  private drawOutfielderSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
-    this.drawGrade(ctx, skillGrades[0], GradePosition.ONE);
-    this.drawGrade(ctx, skillGrades[1], GradePosition.TWO);
-    this.drawGrade(ctx, skillGrades[2], GradePosition.THREE);
-    this.drawGrade(ctx, skillGrades[3], GradePosition.FOUR);
-    this.drawGrade(ctx, skillGrades[4], GradePosition.FIVE);
-    this.drawGrade(ctx, skillGrades[5], GradePosition.SIX);
-    this.drawGrade(ctx, skillGrades[6], GradePosition.SEVEN);
+  private async drawOutfielderSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
+    await this.drawGrades(ctx, skillGrades, this.outfilederSkillsNo);
   }
 
-  private drawGoalkeeperSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
-    this.drawGrade(ctx, skillGrades[0], GradePosition.ONE);
-    this.drawGrade(ctx, skillGrades[1], GradePosition.TWO);
-    this.drawGrade(ctx, skillGrades[2], GradePosition.THREE);
-    this.drawGrade(ctx, skillGrades[3], GradePosition.FOUR);
-    this.drawGrade(ctx, skillGrades[4], GradePosition.FIVE);
+  private async drawGoalkeeperSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
+    await this.drawGrades(ctx, skillGrades, this.gkSkillsNo);
   }
 
+  private async drawGrades(ctx: CanvasRenderingContext2D, grades: number[], gradesToDrawNo: number) {
+    var gradesPromises = [];
+    for (let gradeIdx = 0; gradeIdx < gradesToDrawNo; gradeIdx++) {
+      gradesPromises.push(new Promise(resolve => {
+        this.drawGrade(ctx, grades[gradeIdx], GradePosition.getGradePositionByOrder(gradeIdx + 1), resolve);
+      }))
+    }
+    await Promise.all(gradesPromises);
+  }
 
-  private drawGrade(ctx: CanvasRenderingContext2D, grade: number, gradePosition: GradePosition) {
+  private drawGrade(ctx: CanvasRenderingContext2D, grade: number, gradePosition: GradePosition, resolveCallback: any) {
     let image = new Image();
     image.src = PathsGeneratorService.generateGradesPath(grade);
     image.onload = function() {
       var img = <HTMLImageElement> this;
       ctx.drawImage(img, 120, gradePosition.cordinateY, img.width, img.height);
+      resolveCallback();
     }
   }
 

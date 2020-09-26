@@ -25,6 +25,7 @@
     "@ngx-translate/core": "^12.1.2",
     "@ngx-translate/http-loader": "^4.0.0",
     "@ngx-translate/i18n-polyfill": "^1.0.0",
+    "jspdf": "^1.5.3",
     "pdfmake": "^0.1.68",
     "raw-loader": "^4.0.1",
     "rxjs": "~6.5.4",

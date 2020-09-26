@@ -41,25 +41,11 @@ export class CardsCreatorComponent implements OnInit {
     this.cardsPainter.drawCard(this.canvasCtx, player);
   }
 
-  // incomingFile(event) {
-  //   this.customCardsFileReaderService.incomingFile(event);
-  // }
-  //
-  // uploadFile(){
-  //   this.customCardsFileReaderService.uploadFile().then(() => {
-  //     this.data = this.customCardsFileReaderService.players
-  //     this.players.data = this.data;
-  //   });
-  // }
-
   generatePdf() {
-    console.log(this.data);
-    console.log(this.players.data);
-    this.cardPdfGenerator.generatePdf(this.data, this.canvasCtx);
+    this.cardPdfGenerator.generatePdf(this.data);
   }
 
   deletePlayer(playerToDelete: Player) {
-    // var playersInTable = this.data;
     const playerToDeleteIdx = this.data.findIndex(player => player === playerToDelete);
     this.data.splice(playerToDeleteIdx, 1);
     this.players.data = this.data;
@@ -68,9 +54,8 @@ export class CardsCreatorComponent implements OnInit {
   openUploadFileDialog() {
     const dialogRef = this.dialog.open(UploadPlayersDialogComponent, {});
     dialogRef.afterClosed().subscribe(result => {
-      if(result.players != null) {
+      if(result != null) {
             this.data = result.players;
-            console.log(this.data);
             this.players.data = this.data;
       }
     })
@@ -81,7 +66,7 @@ export class CardsCreatorComponent implements OnInit {
     data.action = "Add player";
     const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
     dialogRef.afterClosed().subscribe(result => {
-      if(result.event != undefined) {
+      if(result != undefined && result.event != undefined) {
         data.player.updatePlayer(result.player);
         this.addPlayer(data.player);
         this.drawCard(data.player);
@@ -107,7 +92,6 @@ export class CardsCreatorComponent implements OnInit {
       playerToAdd.dribbling, playerToAdd.heading, playerToAdd.highPass, playerToAdd.resilience, playerToAdd.shooting,
       playerToAdd.tackling, playerToAdd.saving, playerToAdd.aerialAbility);
 
-    // var playersInTable = this.players.data;
     this.data.push(newPlayer);
     this.players.data = this.data;
   }

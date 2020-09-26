@@ -38,19 +38,19 @@ export class PlayerDialogComponent implements OnInit {
         name: new FormControl(data.player.name, [Validators.required]),
         country: new FormControl(data.player.country, [Validators.required]),
         position: new FormControl(data.player.position, [Validators.required]),
-        dribbling: new FormControl(data.player.dribbling, [Validators.required, NumberInputValidator.validSkillValue]),
-        pace: new FormControl(data.player.pace, [Validators.required, NumberInputValidator.validSkillValue]),
-        resilience: new FormControl(data.player.resilience, [Validators.required, NumberInputValidator.validSkillValue])
+        dribbling: new FormControl(data.player.dribbling, [Validators.required, NumberInputValidator.validSkillValue()]),
+        pace: new FormControl(data.player.pace, [Validators.required, NumberInputValidator.validSkillValue()]),
+        resilience: new FormControl(data.player.resilience, [Validators.required, NumberInputValidator.validSkillValue()])
       }),
       goalkeeper: new FormGroup({
-        aerialAbility: new FormControl(data.player.aerialAbility,[Validators.required, NumberInputValidator.validSkillValue]),
-        saving: new FormControl(data.player.saving, [Validators.required, NumberInputValidator.validSkillValue]),
+        aerialAbility: new FormControl(data.player.aerialAbility,[Validators.required, NumberInputValidator.validSkillValue()]),
+        saving: new FormControl(data.player.saving, [Validators.required, NumberInputValidator.validSkillValue()]),
       }),
       outfielder: new FormGroup({
-        heading: new FormControl(data.player.heading, [Validators.required, NumberInputValidator.validSkillValue]),
-        highPass: new FormControl(data.player.highPass, [Validators.required, NumberInputValidator.validSkillValue]),
-        shooting: new FormControl(data.player.shooting, [Validators.required, NumberInputValidator.validSkillValue]),
-        tackling: new FormControl(data.player.tackling, [Validators.required, NumberInputValidator.validSkillValue])
+        heading: new FormControl(data.player.heading, [Validators.required, NumberInputValidator.validSkillValue()]),
+        highPass: new FormControl(data.player.highPass, [Validators.required, NumberInputValidator.validSkillValue()]),
+        shooting: new FormControl(data.player.shooting, [Validators.required, NumberInputValidator.validSkillValue()]),
+        tackling: new FormControl(data.player.tackling, [Validators.required, NumberInputValidator.validSkillValue()])
       })
     })
   }
