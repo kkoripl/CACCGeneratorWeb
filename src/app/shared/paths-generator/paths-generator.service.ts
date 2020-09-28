@@ -6,6 +6,9 @@ export class PathsGeneratorService {
   private static gradesDirectory = "../assets/img/grades/";
   private static cardsPatternDirectory = "../assets/img/card_patterns/";
 
+  private static exampleXlsDirectory = "../assets/xls/";
+  private static exampleXlsFile = "example.xls"
+
   private static flagsExt = "png";
   private static gradesExt = "png";
   private static cardExt = "png";
@@ -32,5 +35,9 @@ export class PathsGeneratorService {
 
   private static generateCardPath(cardPattern: string): string {
     return this.cardsPatternDirectory + cardPattern + "." + this.cardExt;
+  }
+
+  public static generateExampleXlsPath(): string {
+    return this.exampleXlsDirectory + this.exampleXlsFile;
   }
 }

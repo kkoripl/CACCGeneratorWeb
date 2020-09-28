@@ -24,6 +24,11 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {MatInputModule} from "@angular/material/input";
 import {MatRadioModule} from "@angular/material/radio";
 import {UploadPlayersDialogComponent} from "./shared/dialogs/upload-players-dialog/upload-players-dialog.component";
+import {MatMenuModule} from "@angular/material/menu";
+import {GeneralErrorHandler} from "./shared/error/error-handler/general-error-handler";
+import {ToastrModule} from "ngx-toastr";
+import {MatListModule} from "@angular/material/list";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
   declarations: [
@@ -35,25 +40,31 @@ import {UploadPlayersDialogComponent} from "./shared/dialogs/upload-players-dial
     PlayerDialogComponent,
     UploadPlayersDialogComponent
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        HttpClientModule,
-        BrowserAnimationsModule,
-        MatToolbarModule,
-        MatIconModule,
-        MatButtonModule,
-        MatCardModule,
-        MatDialogModule,
-        MatProgressBarModule,
-        MatInputModule,
-        MatTableModule,
-        MatSelectModule,
-        FormsModule,
-        MatRadioModule,
-        ReactiveFormsModule
-    ],
-  providers: [],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    BrowserAnimationsModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatButtonModule,
+    MatCardModule,
+    MatDialogModule,
+    MatProgressBarModule,
+    MatInputModule,
+    MatTableModule,
+    MatSelectModule,
+    FormsModule,
+    MatRadioModule,
+    ReactiveFormsModule,
+    MatMenuModule,
+    ToastrModule.forRoot(),
+    MatListModule,
+    MatTooltipModule
+  ],
+  providers: [{
+      provide: ErrorHandler, useClass: GeneralErrorHandler
+    }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

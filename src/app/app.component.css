@@ -1,0 +1,91 @@
+@font-face {
+  font-family: 'Komika Axis', monospace;
+  src: url(src/assets/fonts/KomikaAxis.woff2) format('woff2'),
+  url(src/assets/fonts/KomikaAxis.woff) format('woff'),
+  url(src/assets/fonts/komikaaxis.ttf) format('truetype');
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 8px 0;
+}
+
+p {
+  margin: 0;
+}
+
+.spacer {
+  flex: 1;
+}
+
+a,
+a:visited,
+a:hover {
+  color: #007d01;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #015e02;
+}
+
+footer {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  line-height: 20px;
+}
+
+.content {
+  display: flex;
+  margin: 82px auto 32px;
+  padding: 0 16px;
+  max-width: 960px;
+  flex-direction: column;
+  align-items: center;
+}
+
+svg#clouds {
+  position: fixed;
+  bottom: -160px;
+  left: -230px;
+  z-index: -10;
+  width: 1920px;
+}
+
+footer a {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar img {
+  margin: 0 16px;
+}
+
+.toolbar #twitter-logo, #facebook-logo {
+  margin: 0 16px;
+}
+
+.toolbar #twitter-logo:hover, #facebook-logo:hover {
+  opacity: 0.8;
+}
+
+.svg-icon {
+  width: 1em;
+  height: 1em;
+}
+
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+  fill: white;
+}
+
+.svg-icon circle {
+  stroke: white;
+  stroke-width: 1;
+}

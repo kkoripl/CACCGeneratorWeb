@@ -5,5 +5,30 @@ table {
 }
 
 canvas {
-  border-style: solid;
+  float: right;
+}
+
+div.sticky-canvas {
+  top: 0;
+  position: sticky;
+  position: -webkit-sticky;
+}
+
+div.overflow {
+  overflow: hidden;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.aligned-with-icon{
+  position: relative;
+  margin-top: 6px;
+  margin-left: 6px;
+}
+
+::ng-deep .mat-tooltip {
+  font-size: 15px;
+  white-space: pre-line;
 }
