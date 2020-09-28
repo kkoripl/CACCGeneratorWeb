@@ -11,8 +11,6 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {HttpClientModule} from "@angular/common/http";
 
-import {XlsReaderComponent} from './shared/file-reader/xls-file-reader/xls-reader.component';
-import {MatchFileReaderComponent} from './shared/file-reader/match-file-reader/match-file-reader.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatTableModule} from "@angular/material/table";
 import {LeagueTableComponent} from './league-table/league-table.component';
@@ -33,8 +31,6 @@ import {MatTooltipModule} from "@angular/material/tooltip";
 @NgModule({
   declarations: [
     AppComponent,
-    XlsReaderComponent,
-    MatchFileReaderComponent,
     LeagueTableComponent,
     CardsCreatorComponent,
     PlayerDialogComponent,

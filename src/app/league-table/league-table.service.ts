@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import {Injectable} from "@angular/core";
 import {Team} from "../entities/team/team";
 import {Match} from "../entities/match/match";
 import {LeagueTableRow} from "../entities/league-table/league-table-row";
@@ -20,9 +20,6 @@ export class LeagueTableService  {
   }
 
   calculateTable(teams: Team[], matches: Match[]): LeagueTableRow[] {
-    console.log('calculate table!');
-    console.log(teams);
-    console.log(matches);
     let leagueTableRows: LeagueTableRow[] = [];
 
     for (const team of teams) {

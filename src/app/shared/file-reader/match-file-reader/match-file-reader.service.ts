@@ -1,8 +1,7 @@
-import { Injectable } from "@angular/core";
+import {Injectable} from "@angular/core";
 import {FileReaderService} from "../file-reader.service";
 import {Match} from "../../../entities/match/match";
 import {Team} from "../../../entities/team/team";
-import {LeagueTableService} from "../../../league-table/league-table.service";
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +21,6 @@ export class MatchFileReaderService extends FileReaderService {
     return new Promise((resolve, reject) => {
       this.fileReader.onload = (e) => {
         for (const line of this.fileReader.result.toString().split(/[\r\n]+/)) {
-          console.log(line);
           if (line) {
             let homeTeam = this.retrieveHomeTeamFromResult(line);
             let awayTeam = this.retrieveAwayTeamFromResult(line);
