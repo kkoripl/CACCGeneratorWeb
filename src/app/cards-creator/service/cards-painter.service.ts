@@ -3,6 +3,9 @@ import {GradePosition} from "../../shared/enums/grade-position.enum";
 import {Country} from "../../shared/enums/country";
 import {Player} from "../../entities/player/player";
 import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
+import {FlagGraphicNotFoundError} from "../../shared/error/card-drawing-errors/flag-graphic-not-found-error";
+import {GradeGraphicNotFoundError} from "../../shared/error/card-drawing-errors/grade-graphic-not-found-error";
+import {CardGraphicNotFoundError} from "../../shared/error/card-drawing-errors/card-graphic-not-found.error";
 
 @Injectable({
   providedIn: 'root'
@@ -30,12 +33,14 @@ export class CardsPainterService {
     let image = new Image();
     image.onload = (e) => this.drawOutfielderImage(image, ctx, player, resolveCallback);
     image.src = PathsGeneratorService.generateOutfielderCardPath();
+    image.onerror = () => {throw new CardGraphicNotFoundError(player.position)}
   }
 
   private drawGoalkeeper(ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
     let image = new Image();
     image.onload = (e) => this.drawGoalkeeperImage(image, ctx, player, resolveCallback);
     image.src = PathsGeneratorService.generateGoalkeeperCardPath();
+    image.onerror = () => {throw new CardGraphicNotFoundError(player.position)}
   }
 
   private async drawOutfielderImage(img, ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
@@ -68,6 +73,14 @@ export class CardsPainterService {
     });
   }
 
+  private async drawOutfielderSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
+    await this.drawGrades(ctx, skillGrades, this.outfilederSkillsNo);
+  }
+
+  private async drawGoalkeeperSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
+    await this.drawGrades(ctx, skillGrades, this.gkSkillsNo);
+  }
+
   private drawPlayerName(ctx: CanvasRenderingContext2D, name: string) {
     ctx.font = this.createFont(18, this.fontName)
     ctx.fillText(name,27, 40);
@@ -81,19 +94,12 @@ export class CardsPainterService {
       ctx.drawImage(img, 26,43, 29, 29);
       resolveCallback();
     }
+    image.onerror = () => {throw new FlagGraphicNotFoundError(country);}
   }
 
   private drawCountryName(ctx: CanvasRenderingContext2D, country: Country) {
     ctx.font = this.createFont(11, this.fontName)
     ctx.fillText(country.name,58, 62);
-  }
-
-  private async drawOutfielderSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
-    await this.drawGrades(ctx, skillGrades, this.outfilederSkillsNo);
-  }
-
-  private async drawGoalkeeperSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
-    await this.drawGrades(ctx, skillGrades, this.gkSkillsNo);
   }
 
   private async drawGrades(ctx: CanvasRenderingContext2D, grades: number[], gradesToDrawNo: number) {
@@ -114,6 +120,7 @@ export class CardsPainterService {
       ctx.drawImage(img, 120, gradePosition.cordinateY, img.width, img.height);
       resolveCallback();
     }
+    image.onerror = () => {throw new GradeGraphicNotFoundError(grade);}
   }
 
   private createFont(size: number, fontName: string) {

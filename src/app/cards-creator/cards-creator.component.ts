@@ -1,4 +1,5 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import * as fileSaver from 'file-saver';
 import {Player} from "../entities/player/player";
 import {CustomCardsFileReaderService} from "../shared/file-reader/custom-cards-file-reader/custom-cards-file-reader.service";
 import {MatTableDataSource} from "@angular/material/table";
@@ -10,6 +11,8 @@ import {PlayerDialogComponent} from "../shared/dialogs/player-dialog/player-dial
 import {PlayerPosition} from "../shared/enums/player-position";
 import {CardsPdfGeneratorService} from "./service/cards-pdf-generator.service";
 import {UploadPlayersDialogComponent} from "../shared/dialogs/upload-players-dialog/upload-players-dialog.component";
+import {NotificationService} from "../shared/dialogs/notifications/notification.service";
+import {FileDownloadService} from "../shared/file-service/file-download.service";
 
 @Component({
   selector: 'app-cards-creator',
@@ -31,7 +34,9 @@ export class CardsCreatorComponent implements OnInit {
   constructor(private customCardsFileReaderService: CustomCardsFileReaderService,
               private cardsPainter: CardsPainterService,
               private cardPdfGenerator: CardsPdfGeneratorService,
-              private dialog: MatDialog) { }
+              private dialog: MatDialog,
+              private notifyService: NotificationService,
+              private fileDownloadService: FileDownloadService) { }
 
   ngOnInit(): void {
     this.canvasCtx = this.canvas.nativeElement.getContext('2d');
@@ -42,6 +47,7 @@ export class CardsCreatorComponent implements OnInit {
   }
 
   generatePdf() {
+    this.notifyService.showInfo("Generating PDF", "Creating pdf file started");
     this.cardPdfGenerator.generatePdf(this.data);
   }
 
@@ -94,5 +100,20 @@ export class CardsCreatorComponent implements OnInit {
 
     this.data.push(newPlayer);
     this.players.data = this.data;
+  }
+
+  downloadExampleXls() {
+      this.fileDownloadService.downloadExampleXls().subscribe(response => {
+        let blob:any = new Blob([response.blob()]);
+        fileSaver.saveAs(blob, 'example.xls');
+      })
+  }
+
+  arePlayersToGenerate(): boolean {
+    return Array.isArray(this.players.data) && this.players.data.length != 0;
+  }
+
+  getInstructionText(): string {
+    return "1. Add new player via 'Add' button or upload XLS file with players. Download example XLS file and change player names, skills and countries which can be named by name, alpha-2 or alpha-3 code in country column. All possible countries are in 'countries' sheet.\n\n2. Preview each added player by clicking on its row in the table!\n\n3. Edit or delete players using action buttons on the right side of the table.\n\n4. Generate pdf and print your cards!";
   }
 }

@@ -1,4 +1,7 @@
-import { Injectable } from "@angular/core";
+import {Injectable} from "@angular/core";
+import * as _ from 'underscore';
+
+import {FileExtension} from "../enums/file-extension";
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +17,7 @@ export class FileReaderService {
   }
 
   incomingFile(event) {
-    this.file = event.target.files[0];
+      this.file = event.target.files[0];
   }
 
   prepareFileToUpload() {
@@ -24,10 +27,14 @@ export class FileReaderService {
       };
 
       this.fileReader.onerror = function (ex) {
-        console.log(ex);
       };
 
       this.fileReader.readAsBinaryString(this.file);
     });
+  }
+
+  fileIsOneOf(file: File, acceptedFileTypes: FileExtension[]): boolean {
+    return _.map(acceptedFileTypes, function(acceptedType) {return acceptedType})
+            .includes(file.type);
   }
 }

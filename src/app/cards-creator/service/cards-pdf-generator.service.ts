@@ -3,6 +3,7 @@ import {Injectable} from "@angular/core";
 import {Player} from "../../entities/player/player";
 import {CardsPainterService} from "./cards-painter.service";
 import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
+import {ReverseGraphicNotFoundError} from "../../shared/error/card-drawing-errors/reverse-graphic-not-found.error";
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,7 @@ export class CardsPdfGeneratorService {
 
   constructor(private cardsPainter: CardsPainterService) {
     this.REVERSE_CARD.src = PathsGeneratorService.generateReverseCardPath();
+    this.REVERSE_CARD.onerror = () => {throw new ReverseGraphicNotFoundError()};
   }
 
   generatePdf(players: Player[]) {

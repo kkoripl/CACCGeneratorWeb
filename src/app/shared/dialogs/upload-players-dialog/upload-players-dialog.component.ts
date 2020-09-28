@@ -3,6 +3,8 @@ import {CustomCardsFileReaderService} from "../../file-reader/custom-cards-file-
 import {MatDialogRef} from "@angular/material/dialog";
 import {CountryNameCodes} from "../../enums/country-name-codes";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {FileExtension} from "../../enums/file-extension";
+import {FileInputValidator} from "../../validators/file-input.validator";
 
 @Component({
   selector: "upload-players-dialog",
@@ -12,9 +14,10 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 
 export class UploadPlayersDialogComponent {
 
-  public countryForm: FormGroup;
+  public uploadForm: FormGroup;
+  public file;
   CountryNameCodes = CountryNameCodes;
-  private fileChoosen: boolean = false;
+
 
   constructor(private customCardsFileReaderService: CustomCardsFileReaderService,
               private dialogRef: MatDialogRef<UploadPlayersDialogComponent>) {
@@ -23,7 +26,7 @@ export class UploadPlayersDialogComponent {
 
   incomingFile(event) {
     this.customCardsFileReaderService.incomingFile(event);
-    this.fileChoosen = true;
+    this.file = this.customCardsFileReaderService.file.name;
   }
 
   uploadFile(countryCoding: CountryNameCodes) {
@@ -33,13 +36,15 @@ export class UploadPlayersDialogComponent {
   }
 
   private buildFormConfig() {
-    this.countryForm = new FormGroup({
-      countryCoding: new FormControl(CountryNameCodes.NAME, [Validators.required])
+    this.uploadForm = new FormGroup({
+      countryCoding: new FormControl(CountryNameCodes.NAME, [Validators.required]),
+      file: new FormControl("", [Validators.required,
+                                                         FileInputValidator.validType([FileExtension.XLS, FileExtension.XLSX])])
     })
   }
 
-  fileWasChoosen() {
-    return this.fileChoosen;
+  validUploadData(): boolean {
+    return this.uploadForm.valid;
   }
 
   closeDialog(){

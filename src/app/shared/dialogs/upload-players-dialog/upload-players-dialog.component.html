@@ -1,17 +1,24 @@
+<div layout="column" layout-align="space-around center">
 <h1 mat-dialog-title><strong>Upload players file</strong></h1>
-<div [formGroup]="countryForm">
-  <div>
-    <mat-radio-group aria-label="Player position" formControlName="countryCoding">
-      <mat-radio-button value="{{CountryNameCodes.NAME}}">{{CountryNameCodes.NAME.valueOf()}}</mat-radio-button>
-      <mat-radio-button value="{{CountryNameCodes.ALPHA2CODE}}">{{CountryNameCodes.ALPHA2CODE.valueOf()}}</mat-radio-button>
-      <mat-radio-button value="{{CountryNameCodes.ALPHA3CODE}}">{{CountryNameCodes.ALPHA3CODE.valueOf()}}</mat-radio-button>
+<div mat-dialog-content [formGroup]="uploadForm" style="display: block">
+  <span>Differentiate countries by:&nbsp;</span>
+  <div style="display: block;">
+    <mat-radio-group formControlName="countryCoding">
+      <mat-radio-button value="{{CountryNameCodes.NAME}}">{{CountryNameCodes.NAME.valueOf()}}</mat-radio-button>&nbsp;
+      <mat-radio-button value="{{CountryNameCodes.ALPHA2CODE}}">{{CountryNameCodes.ALPHA2CODE.valueOf()}}</mat-radio-button>&nbsp;
+      <mat-radio-button value="{{CountryNameCodes.ALPHA3CODE}}">{{CountryNameCodes.ALPHA3CODE.valueOf()}}</mat-radio-button>&nbsp;
     </mat-radio-group>
   </div>
   <div>
-    <input type="file" style="display: inline-block;" (change)="incomingFile($event)" placeholder="{{'uploadFilePlaceholder'}}" accept=".txt" [disabled]="!countryForm.valid">
+      <input type="file" style="display: inline-block;" (change)="incomingFile($event)"
+             formControlName="file"
+             placeholder="{{'uploadFilePlaceholder'}}"
+             [disabled]="!uploadForm.valid">
   </div>
-  <div mat-dialog-actions>
-    <button mat-button type="submit" [disabled]="!fileWasChoosen()" (click)="uploadFile(countryForm.value.countryCoding)">Upload file</button>
-    <button mat-button (click)="closeDialog()" mat-flat-button color="warn">Cancel</button>
-  </div>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-stroked-button type="submit" [disabled]="!validUploadData()" (click)="uploadFile(uploadForm.value.countryCoding)">Upload file</button>
+  <button mat-button (click)="closeDialog()" mat-flat-button color="warn">Cancel</button>
+</div>
 </div>

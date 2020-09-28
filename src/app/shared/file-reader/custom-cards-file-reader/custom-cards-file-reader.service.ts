@@ -1,28 +1,31 @@
 import {Injectable} from "@angular/core";
+import * as XLSX from "xlsx";
+
 import {Player} from "../../../entities/player/player";
 import {FileReaderService} from "../file-reader.service";
-import * as XLSX from "xlsx";
 import {CardFields} from "./cards-fields.enum";
 import {Countries} from "../../enums/countries";
 import {PlayerPosition} from "../../enums/player-position";
 import {CountryNameCodes} from "../../enums/country-name-codes";
+import {PlayersFileValidatorService} from "../../validators/players-file-validator.service";
+import {NotificationService} from "../../dialogs/notifications/notification.service";
+
 
 @Injectable({
   providedIn: 'root'
 })
-
 export class CustomCardsFileReaderService extends FileReaderService {
 
   players: Player[] = [];
 
-  isGoalkeeper = player => player[CardFields.SAVING] != undefined;
-
-  constructor() {
+  constructor(private dataValidator: PlayersFileValidatorService,
+              private notifyService: NotificationService) {
     super();
   }
 
   uploadFile(countryCoding: CountryNameCodes) {
     return new Promise((resolve, reject) => {
+      this.notifyService.showInfo("File uploading", "Uploading players file started");
       this.fileReader.onload = (e) => {
         this.readPlayersDataFromXls(this.fileReader.result, countryCoding);
         resolve(this.fileReader.result);
@@ -32,33 +35,47 @@ export class CustomCardsFileReaderService extends FileReaderService {
     });
   }
 
-  readPlayersDataFromXls(data, countryCoding: CountryNameCodes) {
+  private readPlayersDataFromXls(data, countryCoding: CountryNameCodes) {
     var workbook = XLSX.read(data, {
       type: 'binary'
     });
 
     var playersData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{header: -1});
-    for (const playerData of playersData) {
-      this.players.push(this.buildPlayerObject(playerData, countryCoding));
+    for (let playerDataIdx = 0; playerDataIdx < playersData.length; playerDataIdx++) {
+      var playerData = playersData[playerDataIdx];
+      this.dataValidator.findErrorsInPlayerData(playerData, countryCoding, playerDataIdx+1);
+      this.players.push(this.buildPlayerObject(playerData, countryCoding, playerDataIdx+1));
     }
   }
 
-  buildPlayerObject(playerData: any, countryCoding: CountryNameCodes): Player {
-    if(this.isGoalkeeper(playerData)) {
-      return new Player(playerData[CardFields.NAME],
-        Countries.getCountryBy(playerData[CardFields.COUNTRY], countryCoding),
-        PlayerPosition.GOALKEEPER,
-        playerData[CardFields.PACE],
-        playerData[CardFields.DRIBBLING],
-        undefined,
-        undefined,
-        playerData[CardFields.RESILIENCE],
-        undefined,
-        undefined,
-        playerData[CardFields.SAVING],
-        playerData[CardFields.AERIAL_ABILITY]);
+  private buildPlayerObject(playerData: any, countryCoding: CountryNameCodes, row: number): Player {
+    if (this.dataValidator.hasGoalkeeperAttributes(playerData)) {
+      return this.buildGoalkeeperObject(playerData, countryCoding);
     } else {
-      return new Player(playerData[CardFields.NAME],
+      this.dataValidator.checkOutfielderDataErrors(playerData, row);
+      return this.buildOutfielderObject(playerData, countryCoding);
+    }
+  }
+
+  private buildGoalkeeperObject(playerData: object, countryCoding: CountryNameCodes): Player {
+    return new Player(
+      playerData[CardFields.NAME],
+      Countries.getCountryBy(playerData[CardFields.COUNTRY], countryCoding),
+      PlayerPosition.GOALKEEPER,
+      playerData[CardFields.PACE],
+      playerData[CardFields.DRIBBLING],
+      undefined,
+      undefined,
+      playerData[CardFields.RESILIENCE],
+      undefined,
+      undefined,
+      playerData[CardFields.SAVING],
+      playerData[CardFields.AERIAL_ABILITY]);
+  }
+
+  private buildOutfielderObject(playerData: object, countryCoding: CountryNameCodes): Player {
+      return new Player(
+        playerData[CardFields.NAME],
         Countries.getCountryBy(playerData[CardFields.COUNTRY], countryCoding),
         PlayerPosition.OUTFIELDER,
         playerData[CardFields.PACE],
@@ -71,5 +88,4 @@ export class CustomCardsFileReaderService extends FileReaderService {
         undefined,
         undefined);
     }
-  }
 }
