@@ -31,7 +31,7 @@ export class CardsPdfGeneratorService {
     let doc = new jsPDF(); // A4 size page of PDF
     let ctx = this.createTemporaryCanvas2dContext(171, 256);
 
-    this.addCards(doc, players, ctx, true)
+    this.addCards(doc, players, ctx, false)
       .then(pdf => pdf.output(this.PDF_ACTION_TYPE)); // Open PDF in new browser tab
   }
 

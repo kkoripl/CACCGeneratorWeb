@@ -104,7 +104,7 @@ export class CardsCreatorComponent implements OnInit {
 
   downloadExampleXls() {
       this.fileDownloadService.downloadExampleXls().subscribe(response => {
-        let blob:any = new Blob([response.blob()]);
+        let blob:any = new Blob([response]);
         fileSaver.saveAs(blob, 'example.xls');
       })
   }

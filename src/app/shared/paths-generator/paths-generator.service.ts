@@ -2,12 +2,15 @@ import {PlayerPosition} from "../enums/player-position";
 
 export class PathsGeneratorService {
 
-  private static flagsDirectory = "../assets/img/flags/";
-  private static gradesDirectory = "../assets/img/grades/";
-  private static cardsPatternDirectory = "../assets/img/card_patterns/";
+  private static flagsDirectory = "./assets/img/flags/";
+  private static gradesDirectory = "./assets/img/grades/";
+  private static cardsPatternDirectory = "./assets/img/card_patterns/";
 
-  private static exampleXlsDirectory = "../assets/xls/";
+  private static exampleXlsDirectory = "./assets/xls/";
   private static exampleXlsFile = "example.xls"
+
+  private static caLogoDirectory = "./assets/img/"
+  private static caLogoFile = "ca_logo.png"
 
   private static flagsExt = "png";
   private static gradesExt = "png";
@@ -39,5 +42,9 @@ export class PathsGeneratorService {
 
   public static generateExampleXlsPath(): string {
     return this.exampleXlsDirectory + this.exampleXlsFile;
+  }
+
+  public static getCaLogoPath(): string {
+    return this.caLogoDirectory + this.caLogoFile;
   }
 }

@@ -1,5 +1,5 @@
-import { Component, TRANSLATIONS } from '@angular/core';
-// import { TranslateService} from "@ngx-translate/core";
+import {Component} from '@angular/core';
+import {PathsGeneratorService} from "./shared/paths-generator/paths-generator.service";
 
 @Component({
   selector: 'app-root',
@@ -9,14 +9,7 @@ import { Component, TRANSLATIONS } from '@angular/core';
 export class AppComponent {
   title = 'cacc-web-frontend';
 
-  // constructor(
-  //   public translate: TranslateService
-  // ) {
-  //   translate.addLangs(['en']);
-  //   translate.setDefaultLang('en');
-  // }
-  //
-  // switchLang(lang: string) {
-  //   this.translate.use(lang);
-  // }
+  getCaLogoPath(): string {
+    return PathsGeneratorService.getCaLogoPath();
+  }
 }
