@@ -49,12 +49,13 @@ footer {
   align-items: center;
 }
 
-svg#clouds {
+svg#hexes {
   position: fixed;
-  bottom: -160px;
-  left: -230px;
+  bottom: -120px;
+  left: -330px;
   z-index: -10;
   width: 1920px;
+  fill-opacity: 70%;
 }
 
 footer a {
@@ -79,13 +80,6 @@ footer a {
   height: 1em;
 }
 
-.svg-icon path,
-.svg-icon polygon,
-.svg-icon rect {
+.svg-icon path {
   fill: white;
-}
-
-.svg-icon circle {
-  stroke: white;
-  stroke-width: 1;
 }

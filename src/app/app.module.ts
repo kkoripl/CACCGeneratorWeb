@@ -27,6 +27,8 @@ import {GeneralErrorHandler} from "./shared/error/error-handler/general-error-ha
 import {ToastrModule} from "ngx-toastr";
 import {MatListModule} from "@angular/material/list";
 import {MatTooltipModule} from "@angular/material/tooltip";
+import {OrderByPipe} from "./shared/pipes/order-by.pipe";
+import {FilterCountryPipe} from "./shared/pipes/filter-country.pipe";
 
 @NgModule({
   declarations: [
@@ -34,7 +36,9 @@ import {MatTooltipModule} from "@angular/material/tooltip";
     LeagueTableComponent,
     CardsCreatorComponent,
     PlayerDialogComponent,
-    UploadPlayersDialogComponent
+    UploadPlayersDialogComponent,
+    OrderByPipe,
+    FilterCountryPipe
   ],
   imports: [
     BrowserModule,
