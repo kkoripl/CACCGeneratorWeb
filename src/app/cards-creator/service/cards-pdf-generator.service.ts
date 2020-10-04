@@ -4,6 +4,7 @@ import {Player} from "../../entities/player/player";
 import {CardsPainterService} from "./cards-painter.service";
 import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
 import {ReverseGraphicNotFoundError} from "../../shared/error/card-drawing-errors/reverse-graphic-not-found.error";
+import {BrowserService} from "../../shared/browser-service/browser.service";
 
 @Injectable({
   providedIn: 'root'
@@ -18,11 +19,13 @@ export class CardsPdfGeneratorService {
   private CARDS_ROW_STARTS_DIST = 70;
 
   private PDF_ACTION_TYPE = "dataurlnewwindow";
+  private PDF_ACTION_TYPE_POPUPS_SECURITY = "datauristring";
   private CARD_IMAGE_EXT = "png";
 
   private REVERSE_CARD = new Image();
 
-  constructor(private cardsPainter: CardsPainterService) {
+  constructor(private cardsPainter: CardsPainterService,
+              private browserService: BrowserService) {
     this.REVERSE_CARD.src = PathsGeneratorService.generateReverseCardPath();
     this.REVERSE_CARD.onerror = () => {throw new ReverseGraphicNotFoundError()};
   }
@@ -32,7 +35,14 @@ export class CardsPdfGeneratorService {
     let ctx = this.createTemporaryCanvas2dContext(171, 256);
 
     this.addCards(doc, players, ctx, false)
-      .then(pdf => pdf.output(this.PDF_ACTION_TYPE)); // Open PDF in new browser tab
+      .then(pdf => {
+        this.setupPdfMetadata(pdf);
+        if (this.browserService.isBrowserWithPopupsSecurity()) {
+          this.renderPdfInNewWindow(pdf);
+        } else {
+          pdf.output(this.PDF_ACTION_TYPE);
+        }
+      });
   }
 
   private createTemporaryCanvas2dContext(width: number, height: number): CanvasRenderingContext2D {
@@ -161,5 +171,23 @@ export class CardsPdfGeneratorService {
 
   private notFirstCard(cardIdx: number): boolean {
      return cardIdx != 0;
+  }
+
+  private setupPdfMetadata(docDefinition: jsPDF) {
+    docDefinition.setProperties({
+      title: 'Counter Attack Custom Cards',
+      subject: 'Counter Attack Custom Cards',
+      author: 'Counter Attack Custom Cards Generator',
+      creator: 'Counter Attack Board Game Tools'
+    });
+  }
+
+  private renderPdfInNewWindow(docDefinition: jsPDF) {
+    var newWindow = window.open('/');
+    fetch(docDefinition.output(this.PDF_ACTION_TYPE_POPUPS_SECURITY))
+      .then(res => res.blob())
+      .then(blob => {
+        newWindow.location.href = URL.createObjectURL(blob);
+      });
   }
 }
