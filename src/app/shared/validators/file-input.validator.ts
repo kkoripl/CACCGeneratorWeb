@@ -12,8 +12,8 @@ export class FileInputValidator {
   }
 
   private static fileIsOnOf(filePath: string, acceptedFileTypes: FileExtension[]): boolean {
-    var extension = filePath.substring(filePath.lastIndexOf("."));
-    return _.map(acceptedFileTypes, function(acceptedType) {return acceptedType})
-            .includes(extension)
+    var extension = filePath.substring(filePath.lastIndexOf(".")).toLowerCase();
+    return _.map(acceptedFileTypes, function(acceptedType) {return acceptedType.toLowerCase()})
+            .includes(extension);
   }
 }

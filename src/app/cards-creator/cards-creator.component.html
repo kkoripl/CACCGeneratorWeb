@@ -1,6 +1,6 @@
 <mat-toolbar color="primary" role="banner">
   <button mat-button type="button" (click)="openUploadFileDialog()" i18n="@@uploadFile">
-    <mat-icon aria-label="Upload">cloud_upload</mat-icon><span class="aligned-with-icon">Upload file</span>
+    <mat-icon aria-label="Upload">cloud_upload</mat-icon><span class="aligned-with-icon">Upload players file</span>
   </button>
   <button mat-button type="button" (click)="openAddingPlayerDialog({})">
     <mat-icon aria-label="Add">add</mat-icon><span class="aligned-with-icon">Add player</span>
@@ -10,7 +10,7 @@
   </button>
   <div class="spacer"></div>
   <button mat-button type="button" (click)="downloadExampleXls()">
-    <mat-icon aria-label="Download example XLS">cloud_download</mat-icon><span class="aligned-with-icon">Example XLS</span>
+    <mat-icon aria-label="Download example XLS">cloud_download</mat-icon><span class="aligned-with-icon">Example players XLS file</span>
   </button>
   <button mat-button matTooltip="{{getInstructionText()}}">
     <mat-icon aria-label="Instruction">book</mat-icon><span class="aligned-with-icon">Instruction</span>

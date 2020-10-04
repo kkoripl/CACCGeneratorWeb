@@ -114,6 +114,6 @@ export class CardsCreatorComponent implements OnInit {
   }
 
   getInstructionText(): string {
-    return "1. Add new player via 'Add' button or upload XLS file with players. Download example XLS file and change player names, skills and countries which can be named by name, alpha-2 or alpha-3 code in country column. All possible countries are in 'countries' sheet.\n\n2. Preview each added player by clicking on its row in the table!\n\n3. Edit or delete players using action buttons on the right side of the table.\n\n4. Generate pdf and print your cards!";
+    return "1. Add new player via 'Add' button or upload .xls/.xlsx file with players. Download example XLS file and change player names, skills and countries which can be named by name, alpha-2 or alpha-3 code in country column. All possible countries are in 'countries' sheet.\n\n2. Preview each added player by clicking on its row in the table!\n\n3. Edit or delete players using action buttons on the right side of the table.\n\n4. Generate pdf and print your cards!";
   }
 }
