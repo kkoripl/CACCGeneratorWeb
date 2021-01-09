@@ -10,4 +10,5 @@ export enum CardFields {
   TACKLING = "Tackling",
   SAVING = "Saving",
   AERIAL_ABILITY = "Aerial Ability",
+  HANDLING = "Handling",
 }

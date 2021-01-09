@@ -65,12 +65,13 @@ export class CustomCardsFileReaderService extends FileReaderService {
       playerData[CardFields.PACE],
       playerData[CardFields.DRIBBLING],
       undefined,
-      undefined,
+      playerData[CardFields.HIGH_PASS],
       playerData[CardFields.RESILIENCE],
       undefined,
       undefined,
       playerData[CardFields.SAVING],
-      playerData[CardFields.AERIAL_ABILITY]);
+      playerData[CardFields.AERIAL_ABILITY],
+      playerData[CardFields.HANDLING]);
   }
 
   private buildOutfielderObject(playerData: object, countryCoding: CountryNameCodes): Player {
@@ -85,6 +86,7 @@ export class CustomCardsFileReaderService extends FileReaderService {
         playerData[CardFields.RESILIENCE],
         playerData[CardFields.SHOOTING],
         playerData[CardFields.TACKLING],
+        undefined,
         undefined,
         undefined);
     }

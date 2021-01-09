@@ -1,129 +1,159 @@
-import {Injectable} from "@angular/core";
-import {GradePosition} from "../../shared/enums/grade-position.enum";
-import {Country} from "../../shared/enums/country";
 import {Player} from "../../entities/player/player";
 import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
-import {FlagGraphicNotFoundError} from "../../shared/error/card-drawing-errors/flag-graphic-not-found-error";
-import {GradeGraphicNotFoundError} from "../../shared/error/card-drawing-errors/grade-graphic-not-found-error";
 import {CardGraphicNotFoundError} from "../../shared/error/card-drawing-errors/card-graphic-not-found.error";
+import {Country} from "../../shared/enums/country";
+import {FlagGraphicNotFoundError} from "../../shared/error/card-drawing-errors/flag-graphic-not-found-error";
+import {GradePosition} from "../../shared/enums/grade-position.enum";
+import {GradeGraphicNotFoundError} from "../../shared/error/card-drawing-errors/grade-graphic-not-found-error";
+import Konva from "konva";
+import {Injectable} from "@angular/core";
+import {environment} from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class CardsPainterService {
-  private fontName = "Komika Axis";
-  private gkSkillsNo = 5;
-  private outfilederSkillsNo = 7;
+  private cardImgConfig = environment.cardConfig.card;
+  private flagImgConfig = environment.cardConfig.flag;
+  private gradeImgConfig = environment.cardConfig.grade;
+  private playerNameConfig = environment.cardConfig.playerName;
+  private countryNameConfig = environment.cardConfig.countryName;
 
   constructor(){}
 
-  async drawCard(ctx: CanvasRenderingContext2D, player: Player) {
-    var drawPromise = new Promise(resolve => {
-      if (player.isGoalkeeper()) {
-        this.drawGoalkeeper(ctx, player, resolve);
-      } else {
-        this.drawOutfielder(ctx, player, resolve);
-      }
-    })
-    await drawPromise;
-  }
-
-  private drawOutfielder(ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
-    let image = new Image();
-    image.onload = (e) => this.drawOutfielderImage(image, ctx, player, resolveCallback);
-    image.src = PathsGeneratorService.generateOutfielderCardPath();
-    image.onerror = () => {throw new CardGraphicNotFoundError(player.position)}
-  }
-
-  private drawGoalkeeper(ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
-    let image = new Image();
-    image.onload = (e) => this.drawGoalkeeperImage(image, ctx, player, resolveCallback);
-    image.src = PathsGeneratorService.generateGoalkeeperCardPath();
-    image.onerror = () => {throw new CardGraphicNotFoundError(player.position)}
-  }
-
-  private async drawOutfielderImage(img, ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
-    ctx.drawImage(img, 0, 0, img.width, img.height);
-    await this.drawOutfielderElements(ctx, player);
-    resolveCallback();
-  }
-
-  private async drawGoalkeeperImage(img, ctx: CanvasRenderingContext2D, player: Player, resolveCallback: any) {
-    ctx.drawImage(img, 0, 0, img.width, img.height);
-    await this.drawGoalkeeperElements(ctx, player);
-    resolveCallback();
-  }
-
-  private async drawOutfielderElements(ctx: CanvasRenderingContext2D, player: Player) {
-    await this.drawPlayerElements(ctx, player);
-    await this.drawOutfielderSkills(ctx, player.getOutfielderSkills());
-  }
-
-  private async drawGoalkeeperElements(ctx: CanvasRenderingContext2D, player: Player) {
-    await this.drawPlayerElements(ctx, player);
-    await this.drawGoalkeeperSkills(ctx, player.getGoalkeeperSkills());
-  }
-
-  private async drawPlayerElements(ctx: CanvasRenderingContext2D, player: Player) {
-    this.drawPlayerName(ctx, player.name);
-    this.drawCountryName(ctx, player.country);
-    await new Promise(resolve => {
-      this.drawCountryFlag(ctx, player.country, resolve)
+  async drawCard(player: Player, containerName: string): Promise<Konva.Stage> {
+    return new Promise(resolve => {
+      var stage = this.setupStage(containerName);
+      var layer = new Konva.Layer();
+      stage.add(layer);
+      this.draw(player, layer).then(() => resolve(stage));
     });
   }
 
-  private async drawOutfielderSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
-    await this.drawGrades(ctx, skillGrades, this.outfilederSkillsNo);
+  private async draw(player: Player, layer: Konva.Layer) {
+    await new Promise(resolve => {
+      this.drawCardImage(player, layer, resolve);
+    })
   }
 
-  private async drawGoalkeeperSkills(ctx: CanvasRenderingContext2D, skillGrades: number[]) {
-    await this.drawGrades(ctx, skillGrades, this.gkSkillsNo);
+  private async drawCardImage(player: Player, layer: Konva.Layer, resolveCallback: any) {
+    var image = new Image();
+    image.addEventListener('load', () => {
+      this.addImageToLayer(layer, image, this.cardImgConfig);
+    });
+    image.src = this.getPlayerPositionTemplatePath(player);
+    image.onerror = () => {throw new CardGraphicNotFoundError(player.position)}
+
+    await this.drawCardElements(player, layer);
+    resolveCallback();
   }
 
-  private drawPlayerName(ctx: CanvasRenderingContext2D, name: string) {
-    ctx.font = this.createFont(18, this.fontName)
-    ctx.fillText(name,27, 40);
-  }
-
-  private drawCountryFlag(ctx: CanvasRenderingContext2D, country: Country, resolveCallback: any) {
-    let image = new Image();
-    image.src = PathsGeneratorService.generateFlagPath(country.alpha2code);
-    image.onload = function() {
-      var img = <HTMLImageElement> this;
-      ctx.drawImage(img, 26,43, 29, 29);
-      resolveCallback();
+  private async drawCardElements(player: Player, layer: Konva.Layer) {
+    await new Promise(resolve => {
+      this.drawCountryFlagKonva(player.country, layer, resolve)
+    });
+    if (player.isGoalkeeper()) {
+      await this.drawGradesKonva(player.getGoalkeeperSkills(), layer);
+    } else {
+      await this.drawGradesKonva(player.getOutfielderSkills(), layer);
     }
-    image.onerror = () => {throw new FlagGraphicNotFoundError(country);}
+    this.drawPlayerNameKonva(player.name, layer);
+    this.drawCountryNameKonva(player.country, layer);
   }
 
-  private drawCountryName(ctx: CanvasRenderingContext2D, country: Country) {
-    ctx.font = this.createFont(11, this.fontName)
-    ctx.fillText(country.name,58, 62);
+  private drawPlayerNameKonva(name: string, layer: Konva.Layer) {
+    this.addTextToLayer(layer, name, this.playerNameConfig);
   }
 
-  private async drawGrades(ctx: CanvasRenderingContext2D, grades: number[], gradesToDrawNo: number) {
+  private drawCountryNameKonva(country: Country, layer: Konva.Layer) {
+    this.addTextToLayer(layer, country.name, this.countryNameConfig);
+  }
+
+  private drawCountryFlagKonva(country: Country, layer: Konva.Layer, resolveCallback: any) {
+    let flagImg = new Image();
+    flagImg.addEventListener('load', () => {
+      this.addImageToLayer(layer, flagImg, this.flagImgConfig);
+      resolveCallback();
+    });
+    flagImg.src = PathsGeneratorService.generateFlagPath(country.alpha2code);
+    flagImg.onerror = () => {throw new FlagGraphicNotFoundError(country);}
+  }
+
+  private async drawGradesKonva(grades: number[], layer: Konva.Layer) {
     var gradesPromises = [];
-    for (let gradeIdx = 0; gradeIdx < gradesToDrawNo; gradeIdx++) {
+    for (let gradeIdx = 0; gradeIdx < grades.length; gradeIdx++) {
       gradesPromises.push(new Promise(resolve => {
-        this.drawGrade(ctx, grades[gradeIdx], GradePosition.getGradePositionByOrder(gradeIdx + 1), resolve);
+        this.drawGradeKonva(grades[gradeIdx], GradePosition.getGradePositionByOrder(gradeIdx+1), layer, resolve);
       }))
     }
     await Promise.all(gradesPromises);
   }
 
-  private drawGrade(ctx: CanvasRenderingContext2D, grade: number, gradePosition: GradePosition, resolveCallback: any) {
-    let image = new Image();
-    image.src = PathsGeneratorService.generateGradesPath(grade);
-    image.onload = function() {
-      var img = <HTMLImageElement> this;
-      ctx.drawImage(img, 120, gradePosition.cordinateY, img.width, img.height);
+  private drawGradeKonva(grade: number, gradePosition: GradePosition, layer: Konva.Layer, resolveCallback: any) {
+    let gradeImg = new Image();
+    gradeImg.addEventListener('load', () => {
+      this.gradeImgConfig.y = gradePosition.cordinateY;
+      this.addImageToLayer(layer, gradeImg, this.gradeImgConfig);
       resolveCallback();
-    }
-    image.onerror = () => {throw new GradeGraphicNotFoundError(grade);}
+    });
+    gradeImg.src = PathsGeneratorService.generateGradesPath(grade);
+    gradeImg.onerror = () => {throw new GradeGraphicNotFoundError(grade);}
   }
 
-  private createFont(size: number, fontName: string) {
-    return size + "px " + fontName;
+  private setupStage(containerName: string): Konva.Stage {
+    return new Konva.Stage({
+      container: containerName,
+      width: this.cardImgConfig.widthPx,
+      height: this.cardImgConfig.heightPx
+    })
+  }
+
+  private addImageToLayer(layer: Konva.Layer, imgToAdd: HTMLImageElement, imgConfig) {
+    var img = new Konva.Image({
+      x: imgConfig.x,
+      y: imgConfig.y,
+      image: imgToAdd,
+      width: imgConfig.widthPx,
+      height: imgConfig.heightPx
+    });
+
+    layer.add(img);
+    layer.batchDraw();
+  }
+
+  private addTextToLayer(layer: Konva.Layer, textToAdd: string, textConfig) {
+    var fontSize = textConfig.fontSize;
+
+    var txt = new Konva.Text({
+      x: textConfig.x,
+      y: textConfig.y - fontSize,
+      text: textToAdd,
+      fontSize: fontSize,
+      fontFamily: textConfig.fontName,
+      fill: textConfig.color,
+    });
+
+    while (txt.width() > textConfig.maxWidthPx) {
+      fontSize = fontSize-1;
+      txt = new Konva.Text({
+        x: textConfig.x,
+        y: textConfig.y - fontSize,
+        text: textToAdd,
+        fontSize: fontSize,
+        fontFamily: textConfig.fontName,
+        fill: textConfig.color,
+      });
+    }
+
+    layer.add(txt);
+  }
+
+  private getPlayerPositionTemplatePath(player: Player): string {
+    if (player.isGoalkeeper()) {
+      return PathsGeneratorService.generateGoalkeeperCardPath();
+    } else {
+      return PathsGeneratorService.generateOutfielderCardPath();
+    }
   }
 }

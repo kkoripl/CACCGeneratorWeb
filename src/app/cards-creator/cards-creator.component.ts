@@ -1,11 +1,10 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import * as fileSaver from 'file-saver';
 import {Player} from "../entities/player/player";
 import {CustomCardsFileReaderService} from "../shared/file-reader/custom-cards-file-reader/custom-cards-file-reader.service";
 import {MatTableDataSource} from "@angular/material/table";
 import {Countries} from "../shared/enums/countries";
 import {Country} from "../shared/enums/country";
-import {CardsPainterService} from "./service/cards-painter.service";
 import {MatDialog} from "@angular/material/dialog";
 import {PlayerDialogComponent} from "../shared/dialogs/player-dialog/player-dialog.component";
 import {PlayerPosition} from "../shared/enums/player-position";
@@ -13,19 +12,21 @@ import {CardsPdfGeneratorService} from "./service/cards-pdf-generator.service";
 import {UploadPlayersDialogComponent} from "../shared/dialogs/upload-players-dialog/upload-players-dialog.component";
 import {NotificationService} from "../shared/dialogs/notifications/notification.service";
 import {FileDownloadService} from "../shared/file-service/file-download.service";
+import {CardsPainterService} from "./service/cards-painter.service";
+import {environment} from '../../environments/environment';
+
 
 @Component({
   selector: 'app-cards-creator',
   templateUrl: './cards-creator.component.html',
   styleUrls: ['./cards-creator.component.css']
 })
-export class CardsCreatorComponent implements OnInit {
-
-  @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-  private canvasCtx: CanvasRenderingContext2D;
+export class CardsCreatorComponent {
 
   displayedColumns: string[] = ['name', 'country', 'pace', 'dribbling', 'heading', 'highPass', 'resilience', 'shooting',
-    'tackling', 'saving', 'aerialAbility', 'actions'];
+    'tackling', 'saving', 'aerialAbility', 'handling', 'actions'];
+
+  exampleExcelConfig = environment.exampleExcelConfig;
 
   players = new MatTableDataSource;
   data: Player[] = [];
@@ -38,12 +39,8 @@ export class CardsCreatorComponent implements OnInit {
               private notifyService: NotificationService,
               private fileDownloadService: FileDownloadService) { }
 
-  ngOnInit(): void {
-    this.canvasCtx = this.canvas.nativeElement.getContext('2d');
-  }
-
   drawCard(player: Player) {
-    this.cardsPainter.drawCard(this.canvasCtx, player);
+    this.cardsPainter.drawCard(player, 'websiteCard');
   }
 
   generatePdf() {
@@ -68,7 +65,7 @@ export class CardsCreatorComponent implements OnInit {
   }
 
   openAddingPlayerDialog(data: any) {
-    data.player = new Player(undefined, undefined, PlayerPosition.GOALKEEPER, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+    data.player = new Player(undefined, undefined, PlayerPosition.GOALKEEPER, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
     data.action = "Add player";
     const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
     dialogRef.afterClosed().subscribe(result => {
@@ -96,7 +93,7 @@ export class CardsCreatorComponent implements OnInit {
   addPlayer(playerToAdd: any) {
     var newPlayer = new Player(playerToAdd.name, playerToAdd.country, playerToAdd.position, playerToAdd.pace,
       playerToAdd.dribbling, playerToAdd.heading, playerToAdd.highPass, playerToAdd.resilience, playerToAdd.shooting,
-      playerToAdd.tackling, playerToAdd.saving, playerToAdd.aerialAbility);
+      playerToAdd.tackling, playerToAdd.saving, playerToAdd.aerialAbility, playerToAdd.handling);
 
     this.data.push(newPlayer);
     this.players.data = this.data;
@@ -105,7 +102,7 @@ export class CardsCreatorComponent implements OnInit {
   downloadExampleXls() {
       this.fileDownloadService.downloadExampleXls().subscribe(response => {
         let blob:any = new Blob([response]);
-        fileSaver.saveAs(blob, 'example.xls');
+        fileSaver.saveAs(blob, this.exampleExcelConfig.fileName);
       })
   }
 

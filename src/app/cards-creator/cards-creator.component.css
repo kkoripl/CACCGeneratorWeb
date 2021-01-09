@@ -4,18 +4,19 @@ table {
   width: 100%;
 }
 
-canvas {
-  float: right;
-}
-
 div.sticky-canvas {
   top: 0;
   position: sticky;
   position: -webkit-sticky;
+  float: right;
 }
 
 div.overflow {
   overflow: hidden;
+}
+
+.invisible {
+  display: none
 }
 
 .spacer {

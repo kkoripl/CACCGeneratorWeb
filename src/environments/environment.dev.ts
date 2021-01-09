@@ -1,5 +1,6 @@
 export const environment = {
-  production: true,
+  production: false,
+
   cardConfig: {
     card: {
       x: 0,
@@ -34,7 +35,7 @@ export const environment = {
       fontSize: 11,
       maxWidthPx: 93.8,
       color: '#00883d'
-    }
+    },
   },
 
   pdfConfig: {

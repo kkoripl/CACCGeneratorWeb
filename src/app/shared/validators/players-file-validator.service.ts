@@ -43,11 +43,15 @@ export class PlayersFileValidatorService {
   }
 
   public hasGoalkeeperAttributes(playerData: object): boolean {
-    return playerData[CardFields.SAVING] != undefined && playerData[CardFields.AERIAL_ABILITY] != undefined;
+    return playerData[CardFields.SAVING] != undefined
+      && playerData[CardFields.AERIAL_ABILITY] != undefined
+      && playerData[CardFields.HANDLING] != undefined;
   }
 
   public hasAtLeastOneGkAttr(playerData: object): boolean {
-    return playerData[CardFields.SAVING] != undefined || playerData[CardFields.AERIAL_ABILITY] != undefined;
+    return playerData[CardFields.SAVING] != undefined
+      || playerData[CardFields.AERIAL_ABILITY] != undefined
+      || playerData[CardFields.HANDLING] != undefined;
   }
 
   public hasOutfielderAttributes(playerData: object): boolean {
@@ -62,7 +66,6 @@ export class PlayersFileValidatorService {
 
   public hasAtLeastOneOutfielderAttr(playerData: object): boolean {
     return playerData[CardFields.HEADING] != undefined ||
-      playerData[CardFields.HIGH_PASS] != undefined ||
       playerData[CardFields.SHOOTING] != undefined ||
       playerData[CardFields.TACKLING] != undefined;
   }

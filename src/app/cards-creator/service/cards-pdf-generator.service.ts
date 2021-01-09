@@ -1,30 +1,28 @@
 import jsPDF from 'jspdf';
 import {Injectable} from "@angular/core";
 import {Player} from "../../entities/player/player";
-import {CardsPainterService} from "./cards-painter.service";
 import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
 import {ReverseGraphicNotFoundError} from "../../shared/error/card-drawing-errors/reverse-graphic-not-found.error";
 import {BrowserService} from "../../shared/browser-service/browser.service";
+import {CardsPainterService} from "./cards-painter.service";
+import {environment} from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class CardsPdfGeneratorService {
-  private CARDS_ON_PAGE = 16;
-  private CARDS_IN_ROW = 4;
-  private FIRST_CARD_X = 8.1;
-  private FIRST_CARD_Y = 6.6;
-  private CARDS_COL_STARTS_DIST = 50;
-  private CARDS_ROW_STARTS_DIST = 70;
-
-  private PDF_ACTION_TYPE = "dataurlnewwindow";
-  private PDF_ACTION_TYPE_POPUPS_SECURITY = "datauristring";
-  private CARD_IMAGE_EXT = "png";
+  private structureConfig = environment.pdfConfig.structure;
+  private pdfActionConfig = environment.pdfConfig.pdfAction;
+  private cardConfig = environment.pdfConfig.card;
+  private metadataConfig = environment.pdfConfig.metadata;
+  private konvaContainerName = "pdfCard";
 
   private REVERSE_CARD = new Image();
 
   constructor(private cardsPainter: CardsPainterService,
+              private konvaCardsPainter: CardsPainterService,
               private browserService: BrowserService) {
     this.REVERSE_CARD.src = PathsGeneratorService.generateReverseCardPath();
     this.REVERSE_CARD.onerror = () => {throw new ReverseGraphicNotFoundError()};
@@ -32,38 +30,30 @@ export class CardsPdfGeneratorService {
 
   generatePdf(players: Player[]) {
     let doc = new jsPDF(); // A4 size page of PDF
-    let ctx = this.createTemporaryCanvas2dContext(171, 256);
 
-    this.addCards(doc, players, ctx, false)
+    this.addCards(doc, players, false, this.structureConfig, this.cardConfig)
       .then(pdf => {
         this.setupPdfMetadata(pdf);
         if (this.browserService.isBrowserWithPopupsSecurity()) {
           this.renderPdfInNewWindow(pdf);
         } else {
-          pdf.output(this.PDF_ACTION_TYPE);
+          pdf.output(this.pdfActionConfig.type);
         }
       });
   }
 
-  private createTemporaryCanvas2dContext(width: number, height: number): CanvasRenderingContext2D {
-    let canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    return canvas.getContext("2d");
-  }
-
-  private async addCards(docDefinition: jsPDF, players: Player[], ctx: CanvasRenderingContext2D, reversesNeeded: boolean) {
+  private async addCards(docDefinition: jsPDF, players: Player[], reversesNeeded: boolean, structureConfig, cardConfig) {
     var firstCardOnPage = false;
     var cardInRowIdx = 0;
     var cardsLeft = 0
     var reversesToAdd = 0;
 
-    var cardX = this.FIRST_CARD_X;
-    var cardY = this.FIRST_CARD_Y;
+    var cardX = structureConfig.firstCardXMm;
+    var cardY = structureConfig.firstCardYMm;
 
     for (let cardIdx = 0; cardIdx < players.length; cardIdx++) {
       firstCardOnPage = false;
-      cardInRowIdx = this.calcCardInRowIdx(cardIdx, this.CARDS_IN_ROW);
+      cardInRowIdx = this.calcCardInRowIdx(cardIdx, structureConfig.rowSize);
 
       if (this.cardShouldStartNewPage(cardIdx)) {
         if (this.notFirstCard(cardIdx)) {
@@ -72,57 +62,64 @@ export class CardsPdfGeneratorService {
 
         if (reversesNeeded) {
           cardsLeft = this.calcCardsLeft(players.length, cardIdx);
-          reversesToAdd = this.calcHowManyReversesToAdd(cardsLeft, this.CARDS_ON_PAGE);
-          this.addReverses(docDefinition, this.REVERSE_CARD, reversesToAdd);
+          reversesToAdd = this.calcHowManyReversesToAdd(cardsLeft, structureConfig.pageSize);
+          this.addReverses(docDefinition, this.REVERSE_CARD, reversesToAdd, structureConfig, cardConfig);
         }
 
         // reset drawing attributes for new page start
         firstCardOnPage = true;
         cardInRowIdx = 0;
-        cardX = this.FIRST_CARD_X;
-        cardY = this.FIRST_CARD_Y;
+        cardX = structureConfig.firstCardXMm;
+        cardY = structureConfig.firstCardYMm;
       }
 
-      if (this.cardShouldStartNextRow(cardInRowIdx, firstCardOnPage, this.CARDS_ON_PAGE)) {
+      if (this.cardShouldStartNextRow(cardInRowIdx, firstCardOnPage, structureConfig.pageSize)) {
         cardInRowIdx = 0;
-        cardX = this.FIRST_CARD_X;
-        cardY = this.startNewRow(cardY, this.CARDS_ROW_STARTS_DIST);
+        cardX = structureConfig.firstCardXMm;
+        cardY = this.startNewRow(cardY, structureConfig.cardsRowStartsDistMm);
       }
-      cardX = this.calcCardXInPositionOfIdx(this.FIRST_CARD_X, cardInRowIdx, this.CARDS_COL_STARTS_DIST);
-      docDefinition = await this.placeCardInPdf(docDefinition, players[cardIdx], cardX, cardY, ctx);
+      cardX = this.calcCardXInPositionOfIdx(structureConfig.firstCardXMm, cardInRowIdx, structureConfig.cardsColStartsDistMm);
+      docDefinition = await this.placeCardInPdf(docDefinition, players[cardIdx], cardX, cardY, cardConfig);
     }
 
     return docDefinition;
   }
 
-  private async placeCardInPdf(docDefinition: jsPDF, player: Player, cardX: number, cardY: number, ctx: CanvasRenderingContext2D) {
+  private async placeCardInPdf(docDefinition: jsPDF, player: Player, cardX: number, cardY: number, cardConfig) {
     return new Promise(resolve => {
-      this.cardsPainter.drawCard(ctx, player)
-        .then(() => {
-          docDefinition.addImage(ctx.canvas.toDataURL('image/' + this.CARD_IMAGE_EXT), this.CARD_IMAGE_EXT, cardX, cardY);
+      this.konvaCardsPainter.drawCard(player, this.konvaContainerName)
+        .then((result) => {
+          docDefinition.addImage({
+            imageData: result.toDataURL({mimeType: cardConfig.imageExt, pixelRatio: cardConfig.pixelRatio}),
+            format: cardConfig.fileExt,
+            x: cardX,
+            y: cardY,
+            w: cardConfig.widthMm,
+            h: cardConfig.heightMm,
+            compression: cardConfig.compression});
           resolve(docDefinition);
         });
     });
   }
 
-  private addReverses(docDefinition: any, reverseCard: HTMLImageElement, reversesToAdd: number) {
-    var reverseX = this.FIRST_CARD_X;
-    var reverseY = this.FIRST_CARD_Y;
+  private addReverses(docDefinition: any, reverseCard: HTMLImageElement, reversesToAdd: number, structureConfig, cardConfig) {
+    var reverseX = structureConfig.firstCardXMm;
+    var reverseY = structureConfig.firstCardYMm;
     var firstReverseOnPage = true;
     var reverseInRowIdx = 0;
 
     for (let reverseIdx = 0; reverseIdx < reversesToAdd; reverseIdx++) {
-      reverseInRowIdx = this.calcCardInRowIdx(reverseIdx, this.CARDS_IN_ROW);
+      reverseInRowIdx = this.calcCardInRowIdx(reverseIdx, structureConfig.rowSize);
 
-      if (this.cardShouldStartNextRow(reverseInRowIdx, firstReverseOnPage, this.CARDS_ON_PAGE)) {
-        reverseX = this.FIRST_CARD_X;
-        reverseY = this.startNewRow(reverseY, this.CARDS_ROW_STARTS_DIST)
+      if (this.cardShouldStartNextRow(reverseInRowIdx, firstReverseOnPage, structureConfig.pageSize)) {
+        reverseX = structureConfig.firstCardXMm;
+        reverseY = this.startNewRow(reverseY, structureConfig.cardsRowStartsDistMm);
         reverseInRowIdx = 0;
       }
 
-      reverseX = this.calcCardXInPositionOfIdx(this.FIRST_CARD_X, reverseInRowIdx, this.CARDS_COL_STARTS_DIST);
+      reverseX = this.calcCardXInPositionOfIdx(structureConfig.firstCardXMm, reverseInRowIdx, structureConfig.cardsColStartsDistMm);
 
-      docDefinition = this.addReverse(docDefinition, reverseCard, reverseX, reverseY);
+      docDefinition = this.addReverse(docDefinition, reverseCard, reverseX, reverseY, cardConfig);
 
       if (firstReverseOnPage) {
         firstReverseOnPage = false;
@@ -131,13 +128,13 @@ export class CardsPdfGeneratorService {
     docDefinition.addPage();
   }
 
-  private addReverse(docDefinition: any, reverse: any, x: number, y: number) {
-    docDefinition.addImage(reverse, this.CARD_IMAGE_EXT, x, y);
+  private addReverse(docDefinition: any, reverse: any, x: number, y: number, cardConfig) {
+    docDefinition.addImage(reverse, cardConfig.fileExt, x, y);
     return docDefinition;
   }
 
   private cardShouldStartNewPage(cardIdx: number): boolean {
-    return cardIdx % this.CARDS_ON_PAGE == 0;
+    return cardIdx % this.structureConfig.pageSize == 0;
   }
 
   private cardShouldStartNextRow(cardInRowIdx: number, firstCardOnPage: boolean, maxCardsInRow: number): boolean {
@@ -174,17 +171,13 @@ export class CardsPdfGeneratorService {
   }
 
   private setupPdfMetadata(docDefinition: jsPDF) {
-    docDefinition.setProperties({
-      title: 'Counter Attack Custom Cards',
-      subject: 'Counter Attack Custom Cards',
-      author: 'Counter Attack Custom Cards Generator',
-      creator: 'Counter Attack Board Game Tools'
-    });
+    var properties = this.metadataConfig;
+    docDefinition.setProperties({properties});
   }
 
   private renderPdfInNewWindow(docDefinition: jsPDF) {
     var newWindow = window.open('/');
-    fetch(docDefinition.output(this.PDF_ACTION_TYPE_POPUPS_SECURITY))
+    fetch(docDefinition.output(this.pdfActionConfig.popupsSecurity))
       .then(res => res.blob())
       .then(blob => {
         newWindow.location.href = URL.createObjectURL(blob);

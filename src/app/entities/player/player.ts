@@ -17,9 +17,10 @@ export class Player {
 
   saving: number
   aerialAbility: number
+  handling: number
 
   constructor(name: string, country: Country, position: PlayerPosition, pace: number, dribbling: number, heading: number,
-              highPass: number, resilience: number, shooting: number, tackling: number, saving: number, aerialAbility: number) {
+              highPass: number, resilience: number, shooting: number, tackling: number, saving: number, aerialAbility: number, handling: number) {
     this.name = name;
     this.country = country;
     this.pace = pace;
@@ -31,8 +32,8 @@ export class Player {
     this.tackling = tackling;
     this.saving = saving;
     this.aerialAbility = aerialAbility;
+    this.handling = handling;
     this.position = position;
-
   }
 
   updatePlayer(player) {
@@ -41,12 +42,13 @@ export class Player {
     this.pace = player.general.pace;
     this.dribbling = player.general.dribbling;
     this.heading = player.outfielder.heading;
-    this.highPass = player.outfielder.highPass;
+    this.highPass = player.general.highPass;
     this.resilience = player.general.resilience;
     this.shooting = player.outfielder.shooting;
     this.tackling = player.outfielder.tackling;
     this.saving = player.goalkeeper.saving;
     this.aerialAbility = player.goalkeeper.aerialAbility;
+    this.handling = player.goalkeeper.handling;
     this.position = player.general.position;
   }
 
@@ -64,6 +66,7 @@ export class Player {
     this.tackling = undefined;
     this.saving = undefined;
     this.aerialAbility = undefined;
+    this.handling = undefined;
   }
 
   getOutfielderSkills(): number[] {
@@ -84,7 +87,9 @@ export class Player {
       this.dribbling,
       this.pace,
       this.resilience,
-      this.saving
+      this.saving,
+      this.handling,
+      this.highPass
     ];
   }
 }

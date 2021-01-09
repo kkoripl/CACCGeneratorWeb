@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "ng serve --configuration=dev",
+    "build": "ng build --configuration=dev",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -27,6 +27,7 @@
     "@ngx-translate/i18n-polyfill": "^1.0.0",
     "file-saver": "^2.0.2",
     "jspdf": "^1.5.3",
+    "konva": "^7.2.2",
     "ngx-toastr": "^13.0.0",
     "pdfmake": "^0.1.68",
     "raw-loader": "^4.0.1",
