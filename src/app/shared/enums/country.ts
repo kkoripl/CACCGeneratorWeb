@@ -53,6 +53,7 @@ export class Country {
   static readonly CHAD = new Country("Chad", "TD", "TCD");
   static readonly CHILE = new Country("Chile", "CL", "CHL");
   static readonly CHINA = new Country("China", "CN", "CHN");
+  static readonly CHINESE_TAIPEI = new Country("Chinese Taipei", "TW", "TWN");
   static readonly CHRISTMAS_ISL = new Country("Christmas Isl.", "CX", "CXR");
   static readonly COCOS_ISLANDS = new Country("Cocos Islands", "CC", "CCK");
   static readonly COLOMBIA = new Country("Colombia", "CO", "COL");
@@ -126,6 +127,7 @@ export class Country {
   static readonly KIRIBATI = new Country("Kiribati", "KI", "KIR");
   static readonly NORTH_KOREA = new Country("North Korea", "KP", "PRK");
   static readonly SOUTH_KOREA = new Country("South Korea", "KR", "KOR");
+  static readonly KOSOVO = new Country("Kosovo", "XK", "XKX");
   static readonly KUWAIT = new Country("Kuwait", "KW", "KWT");
   static readonly KYRGYZSTAN = new Country("Kyrgyzstan", "KG", "KGZ");
   static readonly LAOS = new Country("Laos", "LA", "LAO");
@@ -221,7 +223,6 @@ export class Country {
   static readonly SWEDEN = new Country("Sweden", "SE", "SWE");
   static readonly SWITZERLAND = new Country("Switzerland", "CH", "CHE");
   static readonly SYRIA = new Country("Syria", "SY", "SYR");
-  static readonly TAIWAN = new Country("Taiwan", "TW", "TWN");
   static readonly TAJIKISTAN = new Country("Tajikistan", "TJ", "TJK");
   static readonly TANZANIA = new Country("Tanzania", "TZ", "TZA");
   static readonly THAILAND = new Country("Thailand", "TH", "THA");
