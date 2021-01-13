@@ -29,6 +29,8 @@ import {MatListModule} from "@angular/material/list";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {OrderByPipe} from "./shared/pipes/order-by.pipe";
 import {FilterCountryPipe} from "./shared/pipes/filter-country.pipe";
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @NgModule({
   declarations: [
@@ -60,7 +62,9 @@ import {FilterCountryPipe} from "./shared/pipes/filter-country.pipe";
     MatMenuModule,
     ToastrModule.forRoot(),
     MatListModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatButtonToggleModule,
+    MatSlideToggleModule
   ],
   providers: [{
       provide: ErrorHandler, useClass: GeneralErrorHandler

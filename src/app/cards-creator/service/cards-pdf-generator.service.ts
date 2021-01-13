@@ -1,11 +1,14 @@
 import jsPDF from 'jspdf';
+import Konva from "konva";
+
 import {Injectable} from "@angular/core";
+import {environment} from '../../../environments/environment';
 import {Player} from "../../entities/player/player";
-import {PathsGeneratorService} from "../../shared/paths-generator/paths-generator.service";
-import {ReverseGraphicNotFoundError} from "../../shared/error/card-drawing-errors/reverse-graphic-not-found.error";
 import {BrowserService} from "../../shared/browser-service/browser.service";
 import {CardsPainterService} from "./cards-painter.service";
-import {environment} from '../../../environments/environment';
+import {GradesStyle} from "../../shared/enums/grades-style";
+import {ReverseCardStyle} from "../../shared/enums/reverse-card-style";
+import {CardImgDiv} from "../../shared/enums/card-img-div";
 
 
 @Injectable({
@@ -17,21 +20,15 @@ export class CardsPdfGeneratorService {
   private pdfActionConfig = environment.pdfConfig.pdfAction;
   private cardConfig = environment.pdfConfig.card;
   private metadataConfig = environment.pdfConfig.metadata;
-  private konvaContainerName = "pdfCard";
 
-  private REVERSE_CARD = new Image();
-
-  constructor(private cardsPainter: CardsPainterService,
-              private konvaCardsPainter: CardsPainterService,
+  constructor(private cardsPainterService: CardsPainterService,
               private browserService: BrowserService) {
-    this.REVERSE_CARD.src = PathsGeneratorService.generateReverseCardPath();
-    this.REVERSE_CARD.onerror = () => {throw new ReverseGraphicNotFoundError()};
   }
 
-  generatePdf(players: Player[]) {
+  generatePdf(players: Player[], gradesStyle: GradesStyle, addReverses: boolean, reverseStyle: ReverseCardStyle) {
     let doc = new jsPDF(); // A4 size page of PDF
 
-    this.addCards(doc, players, false, this.structureConfig, this.cardConfig)
+    this.addCards(doc, players, gradesStyle, addReverses, reverseStyle, this.structureConfig, this.cardConfig)
       .then(pdf => {
         this.setupPdfMetadata(pdf);
         if (this.browserService.isBrowserWithPopupsSecurity()) {
@@ -42,7 +39,7 @@ export class CardsPdfGeneratorService {
       });
   }
 
-  private async addCards(docDefinition: jsPDF, players: Player[], reversesNeeded: boolean, structureConfig, cardConfig) {
+  private async addCards(docDefinition: jsPDF, players: Player[], gradesStyle: GradesStyle, reversesNeeded: boolean, reverseStyle: ReverseCardStyle, structureConfig, cardConfig) {
     var firstCardOnPage = false;
     var cardInRowIdx = 0;
     var cardsLeft = 0
@@ -63,7 +60,7 @@ export class CardsPdfGeneratorService {
         if (reversesNeeded) {
           cardsLeft = this.calcCardsLeft(players.length, cardIdx);
           reversesToAdd = this.calcHowManyReversesToAdd(cardsLeft, structureConfig.pageSize);
-          this.addReverses(docDefinition, this.REVERSE_CARD, reversesToAdd, structureConfig, cardConfig);
+          await this.addReverses(docDefinition, reverseStyle, reversesToAdd, structureConfig, cardConfig);
         }
 
         // reset drawing attributes for new page start
@@ -79,31 +76,24 @@ export class CardsPdfGeneratorService {
         cardY = this.startNewRow(cardY, structureConfig.cardsRowStartsDistMm);
       }
       cardX = this.calcCardXInPositionOfIdx(structureConfig.firstCardXMm, cardInRowIdx, structureConfig.cardsColStartsDistMm);
-      docDefinition = await this.placeCardInPdf(docDefinition, players[cardIdx], cardX, cardY, cardConfig);
+      await this.placeCardInPdf(docDefinition, players[cardIdx], gradesStyle, cardX, cardY, cardConfig);
     }
 
     return docDefinition;
   }
 
-  private async placeCardInPdf(docDefinition: jsPDF, player: Player, cardX: number, cardY: number, cardConfig) {
+  private async placeCardInPdf(docDefinition: jsPDF, player: Player, gradesStyle: GradesStyle, cardX: number, cardY: number, cardConfig) {
     return new Promise(resolve => {
-      this.konvaCardsPainter.drawCard(player, this.konvaContainerName)
-        .then((result) => {
-          docDefinition.addImage({
-            imageData: result.toDataURL({mimeType: cardConfig.imageExt, pixelRatio: cardConfig.pixelRatio}),
-            format: cardConfig.fileExt,
-            x: cardX,
-            y: cardY,
-            w: cardConfig.widthMm,
-            h: cardConfig.heightMm,
-            compression: cardConfig.compression});
-          resolve(docDefinition);
+      this.cardsPainterService.drawCard(player, gradesStyle, CardImgDiv.PDF_CARD_FRONT)
+        .then((card) => {
+          this.addCardImageToPdf(docDefinition, card, cardX, cardY, cardConfig);
+          resolve();
         });
     });
   }
 
-  private addReverses(docDefinition: any, reverseCard: HTMLImageElement, reversesToAdd: number, structureConfig, cardConfig) {
-    var reverseX = structureConfig.firstCardXMm;
+  private async addReverses(docDefinition: jsPDF, style: ReverseCardStyle, reversesToAdd: number, structureConfig, cardConfig) {
+    var reverseX = this.calcReversesFirstX(docDefinition, structureConfig.firstCardXMm, cardConfig.widthMm);
     var reverseY = structureConfig.firstCardYMm;
     var firstReverseOnPage = true;
     var reverseInRowIdx = 0;
@@ -112,14 +102,14 @@ export class CardsPdfGeneratorService {
       reverseInRowIdx = this.calcCardInRowIdx(reverseIdx, structureConfig.rowSize);
 
       if (this.cardShouldStartNextRow(reverseInRowIdx, firstReverseOnPage, structureConfig.pageSize)) {
-        reverseX = structureConfig.firstCardXMm;
+        reverseX = this.calcReversesFirstX(docDefinition, structureConfig.firstCardXMm, cardConfig.widthMm);
         reverseY = this.startNewRow(reverseY, structureConfig.cardsRowStartsDistMm);
         reverseInRowIdx = 0;
       }
 
       reverseX = this.calcCardXInPositionOfIdx(structureConfig.firstCardXMm, reverseInRowIdx, structureConfig.cardsColStartsDistMm);
 
-      docDefinition = this.addReverse(docDefinition, reverseCard, reverseX, reverseY, cardConfig);
+      docDefinition = await this.addReverse(docDefinition, style, reverseX, reverseY, cardConfig);
 
       if (firstReverseOnPage) {
         firstReverseOnPage = false;
@@ -128,9 +118,14 @@ export class CardsPdfGeneratorService {
     docDefinition.addPage();
   }
 
-  private addReverse(docDefinition: any, reverse: any, x: number, y: number, cardConfig) {
-    docDefinition.addImage(reverse, cardConfig.fileExt, x, y);
-    return docDefinition;
+  private async addReverse(docDefinition: jsPDF, style: ReverseCardStyle, x: number, y: number, cardConfig) {
+    return new Promise(resolve => {
+      this.cardsPainterService.drawReverse( style, CardImgDiv.PDF_CARD_REVERSE)
+        .then((reverse) => {
+          this.addCardImageToPdf(docDefinition, reverse, x, y, cardConfig);
+          resolve(docDefinition);
+        })
+    });
   }
 
   private cardShouldStartNewPage(cardIdx: number): boolean {
@@ -182,5 +177,24 @@ export class CardsPdfGeneratorService {
       .then(blob => {
         newWindow.location.href = URL.createObjectURL(blob);
       });
+  }
+
+  private calcReversesFirstX(docDefinition: jsPDF, firstCardXMm: number, cardWidthMm: number): number {
+    return this.getPageWidth(docDefinition) - (firstCardXMm + cardWidthMm);
+  }
+
+  private getPageWidth(docDefinition): number {
+    return docDefinition.internal.pageSize.getWidth();
+  }
+
+  private addCardImageToPdf(docDefinition: jsPDF, card: Konva.Stage, cardX: number, cardY: number, cardConfig: any) {
+    docDefinition.addImage({
+      imageData: card.toDataURL({mimeType: cardConfig.imageExt, pixelRatio: cardConfig.pixelRatio}),
+      format: cardConfig.fileExt,
+      x: cardX,
+      y: cardY,
+      w: cardConfig.widthMm,
+      h: cardConfig.heightMm,
+      compression: cardConfig.compression});
   }
 }

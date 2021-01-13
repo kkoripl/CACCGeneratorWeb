@@ -9,15 +9,71 @@ div.sticky-canvas {
   position: sticky;
   position: -webkit-sticky;
   float: right;
+  border: 1px solid black;
 }
 
 div.overflow {
   overflow: hidden;
 }
 
+.fluor-very-ligth-green-border {
+  border: 1px solid #71e555;
+}
+
+mat-label {
+  margin: 6px 8px 6px 20px;
+  font-size: 15px;
+}
+
+.mat-button-toggle-checked {
+  background-color: #71e555;
+  color: black;
+}
+
+mat-button-toggle {
+  font-size: 14px;
+  background-color: green;
+  color: white;
+}
+
+.mat-button-toggle-disabled {
+  background-color: darkgreen;
+  color: white;
+}
+
+mat-button-toggle-group {
+  height: 35px;
+  border-radius: 4px;
+}
+
+/deep/ .mat-button-toggle-label-content{
+  line-height: 0px !important;
+  padding: 18px 10px 10px 10px !important;
+}
+
+/deep/ .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+  background-color: #71e555;
+}
+
+/deep/ .mat-slide-toggle.mat-checked .mat-slide-toggle-thumb {
+  background-color: #74ec55;
+}
+
+/deep/ .mat-slide-toggle .mat-slide-toggle-bar {
+  background-color: darkgreen;
+}
+
+/deep/ .mat-slide-toggle .mat-slide-toggle-thumb {
+  background-color: #017601;
+}
+
 .invisible {
   display: none
 }
+
+.visible {
+}
+
 
 .spacer {
   flex: 1;

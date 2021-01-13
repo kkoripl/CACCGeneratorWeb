@@ -1,4 +1,7 @@
 import {PlayerPosition} from "../enums/player-position";
+import {GradesStyle} from "../enums/grades-style";
+import {ReverseCardStyle} from "../enums/reverse-card-style";
+
 
 export class PathsGeneratorService {
 
@@ -20,8 +23,8 @@ export class PathsGeneratorService {
     return this.flagsDirectory + country + "." + this.flagsExt;
   }
 
-  public static generateGradesPath(grade: number) {
-    return this.gradesDirectory + grade + "." + this.gradesExt;
+  public static generateGradesPath(grade: number, style: GradesStyle) {
+    return this.gradesDirectory + style.directory + "/" + grade + "." + this.gradesExt;
   }
 
   public static generateOutfielderCardPath(): string {
@@ -32,8 +35,8 @@ export class PathsGeneratorService {
     return this.generateCardPath(PlayerPosition.GOALKEEPER.valueOf());
   }
 
-  public static generateReverseCardPath(): string {
-    return this.generateCardPath("card_reverse");
+  public static generateReverseCardPath(style: ReverseCardStyle): string {
+    return this.generateCardPath(style.fileName);
   }
 
   private static generateCardPath(cardPattern: string): string {

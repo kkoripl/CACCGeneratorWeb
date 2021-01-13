@@ -17,7 +17,7 @@ export const environment = {
     grade: {
       x: 120,
       y: 0,
-      widthPx: 21,
+      widthPx: 20,
       heightPx: 19
     },
     playerName: {

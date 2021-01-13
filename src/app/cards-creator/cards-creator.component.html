@@ -1,27 +1,49 @@
-<mat-toolbar color="primary" role="banner">
-  <button mat-button type="button" (click)="openUploadFileDialog()" i18n="@@uploadFile">
-    <mat-icon aria-label="Upload">cloud_upload</mat-icon><span class="aligned-with-icon">Upload players file</span>
-  </button>
-  <button mat-button type="button" (click)="openAddingPlayerDialog({})">
-    <mat-icon aria-label="Add">add</mat-icon><span class="aligned-with-icon">Add player</span>
-  </button>
-  <button mat-button type="button" (click)="generatePdf()" [disabled]="!arePlayersToGenerate()">
-    <mat-icon aria-label="Generate PDF">article</mat-icon><span class="aligned-with-icon">Generate PDF</span>
-  </button>
-  <div class="spacer"></div>
-  <button mat-button type="button" (click)="downloadExampleXls()">
-    <mat-icon aria-label="Download example XLS">cloud_download</mat-icon><span class="aligned-with-icon">Example players XLS file</span>
-  </button>
-  <button mat-button matTooltip="{{getInstructionText()}}">
-    <mat-icon aria-label="Instruction">book</mat-icon><span class="aligned-with-icon">Instruction</span>
-  </button>
+<mat-toolbar color="primary">
+    <button mat-button type="button" (click)="openUploadFileDialog()" i18n="@@uploadFile">
+      <mat-icon aria-label="Upload">cloud_upload</mat-icon><span class="aligned-with-icon">Upload players file</span>
+    </button>
+    <button mat-button type="button" (click)="openAddingPlayerDialog({})">
+      <mat-icon aria-label="Add">add</mat-icon><span class="aligned-with-icon">Add player</span>
+    </button>
+    <button mat-button type="button" (click)="generatePdf()" [disabled]="!arePlayersToGenerate()">
+      <mat-icon aria-label="Generate PDF">article</mat-icon><span class="aligned-with-icon">Generate PDF</span>
+    </button>
+    <button mat-button type="button" (click)="showSettingsMenu()">
+      <mat-icon aria-label="Cards settings">settings</mat-icon><span class="aligned-with-icon">Cards settings</span>
+    </button>
+    <div class="spacer"></div>
+    <button mat-button type="button" (click)="downloadExampleXls()">
+      <mat-icon aria-label="Download example XLS">cloud_download</mat-icon><span class="aligned-with-icon">Example players XLS file</span>
+    </button>
+    <button mat-button matTooltip="{{getInstructionText()}}">
+      <mat-icon aria-label="Instruction">book</mat-icon><span class="aligned-with-icon">Instruction</span>
+    </button>
 </mat-toolbar>
+
+<mat-divider class="fluor-very-ligth-green-border " [ngClass]="settingsMenuShown ? 'visible' : 'invisible'"></mat-divider>
+<mat-toolbar color="primary" [ngClass]="settingsMenuShown ? 'visible' : 'invisible'">
+  <mat-label>Add reverses:</mat-label>
+  <mat-slide-toggle [(ngModel)]="addReverses" (change)="drawReverse()"></mat-slide-toggle>
+  <mat-label>Reverses style:</mat-label>
+  <mat-button-toggle-group [(ngModel)]="reverseStyle" [disabled]="!addReverses" (change)="drawReverse()">
+    <mat-button-toggle [value]="ReverseCardStyle.CLASSIC">{{ReverseCardStyle.CLASSIC.name}}</mat-button-toggle>
+    <mat-button-toggle [value]="ReverseCardStyle.WITH_BALL">{{ReverseCardStyle.WITH_BALL.name}}</mat-button-toggle>
+  </mat-button-toggle-group>
+  <mat-label>Grades style:</mat-label>
+  <mat-button-toggle-group [(ngModel)]="gradesStyle" (change)="drawFront(lastSelectedPlayer)">
+    <mat-button-toggle [value]="GradesStyle.HEX">{{GradesStyle.HEX.name}}</mat-button-toggle>
+    <mat-button-toggle [value]="GradesStyle.CIRCLE">{{GradesStyle.CIRCLE.name}}</mat-button-toggle>
+  </mat-button-toggle-group>
+</mat-toolbar>
+
 <div>
   <div class="load-font-on-page-load">.</div>
   <div class="sticky-canvas">
-    <div id="websiteCard"></div>
+    <div id="{{CardImgDiv.CARD_FRONT_PREVIEW}}"></div>
+    <div id="{{CardImgDiv.CARD_REVERSE_PREVIEW}}" [ngClass]="addReverses ? 'visible' : 'invisible'"></div>
   </div>
-  <div id="pdfCard" class="invisible"></div>
+  <div id="{{CardImgDiv.PDF_CARD_FRONT}}" class="invisible"></div>
+  <div id="{{CardImgDiv.PDF_CARD_REVERSE}}" class="invisible"></div>
 
   <div class="overflow">
     <table mat-table [dataSource]="players">
