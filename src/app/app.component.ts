@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {PathsGeneratorService} from "./shared/paths-generator/paths-generator.service";
 
 @Component({
@@ -6,10 +6,15 @@ import {PathsGeneratorService} from "./shared/paths-generator/paths-generator.se
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'cacc-web-frontend';
+  caLogoPath: string;
 
-  getCaLogoPath(): string {
+  ngOnInit(): void {
+    this.caLogoPath = this.getCaLogoPath();
+  }
+
+  private getCaLogoPath(): string {
     return PathsGeneratorService.getCaLogoPath();
   }
 }
