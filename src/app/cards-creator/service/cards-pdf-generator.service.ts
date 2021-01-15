@@ -75,7 +75,7 @@ export class CardsPdfGeneratorService {
         cardX = structureConfig.firstCardXMm;
         cardY = this.startNewRow(cardY, structureConfig.cardsRowStartsDistMm);
       }
-      cardX = this.calcCardXInPositionOfIdx(structureConfig.firstCardXMm, cardInRowIdx, structureConfig.cardsColStartsDistMm);
+      cardX = this.calcCardFrontXInPositionOfIdx(structureConfig.firstCardXMm, cardInRowIdx, structureConfig.cardsColStartsDistMm);
       await this.placeCardInPdf(docDefinition, players[cardIdx], gradesStyle, cardX, cardY, cardConfig);
     }
 
@@ -93,6 +93,7 @@ export class CardsPdfGeneratorService {
   }
 
   private async addReverses(docDefinition: jsPDF, style: ReverseCardStyle, reversesToAdd: number, structureConfig, cardConfig) {
+    var reverseFirstX = this.calcReversesFirstX(docDefinition, structureConfig.firstCardXMm, cardConfig.widthMm);
     var reverseX = this.calcReversesFirstX(docDefinition, structureConfig.firstCardXMm, cardConfig.widthMm);
     var reverseY = structureConfig.firstCardYMm;
     var firstReverseOnPage = true;
@@ -102,12 +103,12 @@ export class CardsPdfGeneratorService {
       reverseInRowIdx = this.calcCardInRowIdx(reverseIdx, structureConfig.rowSize);
 
       if (this.cardShouldStartNextRow(reverseInRowIdx, firstReverseOnPage, structureConfig.pageSize)) {
-        reverseX = this.calcReversesFirstX(docDefinition, structureConfig.firstCardXMm, cardConfig.widthMm);
+        reverseX = reverseFirstX;
         reverseY = this.startNewRow(reverseY, structureConfig.cardsRowStartsDistMm);
         reverseInRowIdx = 0;
       }
 
-      reverseX = this.calcCardXInPositionOfIdx(structureConfig.firstCardXMm, reverseInRowIdx, structureConfig.cardsColStartsDistMm);
+      reverseX = this.calcCardReverseXInPositionOfIdx(reverseFirstX, reverseInRowIdx, structureConfig.cardsColStartsDistMm);
 
       docDefinition = await this.addReverse(docDefinition, style, reverseX, reverseY, cardConfig);
 
@@ -144,8 +145,12 @@ export class CardsPdfGeneratorService {
     return cardIdx % maxCardsOnPage;
   }
 
-  private calcCardXInPositionOfIdx(cardX: number, cardIdx: number, distBetweenColumns: number): number {
+  private calcCardFrontXInPositionOfIdx(cardX: number, cardIdx: number, distBetweenColumns: number): number {
     return cardX + cardIdx * distBetweenColumns;
+  }
+
+  private calcCardReverseXInPositionOfIdx(cardX: number, cardIdx: number, distBetweenColumns: number): number {
+    return cardX - (cardIdx * distBetweenColumns);
   }
 
   private calcHowManyReversesToAdd(cardsLeft: number, maxCardsOnPage: number): number {
