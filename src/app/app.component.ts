@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {PathsGeneratorService} from "./shared/paths-generator/paths-generator.service";
+import {PathsGeneratorService} from "./cards-creator/services/paths-generator.service";
 
 @Component({
   selector: 'app-root',

@@ -1,0 +1,82 @@
+import {Injectable} from "@angular/core";
+import * as _ from 'underscore';
+
+import {CountryNameCodes} from "../../../common/enums/country-name-codes";
+import {PlayerAllAttributesError} from "../../errors/uploading-file/player-all-attributes.error";
+import {PlayerMixedAttributesError} from "../../errors/uploading-file/player-mixed-attributes.error";
+import {CardFields} from "../../enums/card/cards-fields.enum";
+import {PlayerWrongCountryError} from "../../errors/uploading-file/player-wrong-country.error";
+import {PlayerAttributeOutOfRangeError} from "../../errors/uploading-file/player-attribute-out-of-range.error";
+import {PlayerMissingAttributesError} from "../../errors/uploading-file/player-missing-attributes.error";
+import {Countries} from "../../../common/enums/countries";
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PlayersFileValidatorService {
+
+  hasAllAttributes = playerData => this.hasGoalkeeperAttributes(playerData) && this.hasOutfielderAttributes(playerData);
+  hasMixedAttributes = playerData => this.hasAtLeastOneGkAttr(playerData) && this.hasAtLeastOneOutfielderAttr(playerData);
+
+  public findErrorsInPlayerData(playerData, countryCoding: CountryNameCodes, row: number) {
+    if(this.hasAllAttributes(playerData)) {
+      throw new PlayerAllAttributesError(row);
+    } else if (this.hasMixedAttributes(playerData)) {
+      throw new PlayerMixedAttributesError(row);
+    } else if (this.hasWrongCountry(playerData[CardFields.COUNTRY], countryCoding)) {
+      throw new PlayerWrongCountryError(row);
+    } else if (this.hasAttributeOutOfRange(playerData)) {
+      throw new PlayerAttributeOutOfRangeError(row);
+    }
+  }
+
+  public checkGoalkeeperDataErrors(playerData: object, row: number) {
+    if(!this.hasGoalkeeperAttributes(playerData)) {
+      throw new PlayerMissingAttributesError(row);
+    }
+  }
+
+  public checkOutfielderDataErrors(playerData: object, row: number) {
+    if(!this.hasOutfielderAttributes(playerData)) {
+      throw new PlayerMissingAttributesError(row);
+    }
+  }
+
+  public hasGoalkeeperAttributes(playerData: object): boolean {
+    return playerData[CardFields.SAVING] != undefined
+      && playerData[CardFields.AERIAL_ABILITY] != undefined
+      && playerData[CardFields.HANDLING] != undefined;
+  }
+
+  public hasAtLeastOneGkAttr(playerData: object): boolean {
+    return playerData[CardFields.SAVING] != undefined
+      || playerData[CardFields.AERIAL_ABILITY] != undefined
+      || playerData[CardFields.HANDLING] != undefined;
+  }
+
+  public hasOutfielderAttributes(playerData: object): boolean {
+    return playerData[CardFields.PACE] != undefined &&
+      playerData[CardFields.DRIBBLING] != undefined &&
+      playerData[CardFields.HEADING] != undefined &&
+      playerData[CardFields.HIGH_PASS] != undefined &&
+      playerData[CardFields.RESILIENCE] != undefined &&
+      playerData[CardFields.SHOOTING] != undefined &&
+      playerData[CardFields.TACKLING] != undefined;
+  }
+
+  public hasAtLeastOneOutfielderAttr(playerData: object): boolean {
+    return playerData[CardFields.HEADING] != undefined ||
+      playerData[CardFields.SHOOTING] != undefined ||
+      playerData[CardFields.TACKLING] != undefined;
+  }
+
+  public hasWrongCountry(playerCountry: string, countryCoding: CountryNameCodes): boolean {
+    return Countries.getCountryBy(playerCountry, countryCoding) === undefined;
+  }
+
+  public hasAttributeOutOfRange(playerData) {
+    return _.some(Object.values(playerData), function(value) {
+      return value < 1 || value > 6;
+    });
+  }
+}

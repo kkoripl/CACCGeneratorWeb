@@ -1,22 +1,22 @@
 import {Component, OnInit} from '@angular/core';
 import * as fileSaver from 'file-saver';
-import {Player} from "../entities/player/player";
-import {CustomCardsFileReaderService} from "../shared/file-reader/custom-cards-file-reader/custom-cards-file-reader.service";
+import {Player} from "./models/player/player";
+import {CustomCardsFileReaderService} from "./services/file-reader/custom-cards-file-reader.service";
 import {MatTableDataSource} from "@angular/material/table";
-import {Countries} from "../shared/enums/countries";
-import {Country} from "../shared/enums/country";
+import {Countries} from "../common/enums/countries";
+import {Country} from "../common/enums/country";
 import {MatDialog} from "@angular/material/dialog";
-import {PlayerDialogComponent} from "../shared/dialogs/player-dialog/player-dialog.component";
-import {PlayerPosition} from "../shared/enums/player-position";
-import {CardsPdfGeneratorService} from "./service/cards-pdf-generator.service";
-import {UploadPlayersDialogComponent} from "../shared/dialogs/upload-players-dialog/upload-players-dialog.component";
-import {NotificationService} from "../shared/dialogs/notifications/notification.service";
-import {FileDownloadService} from "../shared/file-service/file-download.service";
-import {CardsPainterService} from "./service/cards-painter.service";
+import {PlayerDialogComponent} from "./dialogs/new-player/player-dialog.component";
+import {PlayerPosition} from "./enums/player/player-position";
+import {CardsPdfGeneratorService} from "./services/cards-pdf-generator.service";
+import {UploadPlayersDialogComponent} from "./dialogs/upload-players/upload-players-dialog.component";
+import {NotificationService} from "../common/dialogs/notifications/notification.service";
+import {FileDownloadService} from "./services/file-download.service";
+import {CardsPainterService} from "./services/cards-painter.service";
 import {environment} from '../../environments/environment';
-import {GradesStyle} from "../shared/enums/grades-style";
-import {ReverseCardStyle} from "../shared/enums/reverse-card-style";
-import {CardImgDiv} from "../shared/enums/card-img-div";
+import {GradesStyle} from "./enums/grades/grades-style";
+import {ReverseCardStyle} from "./enums/card/reverse-card-style";
+import {CardImgDiv} from "./enums/card-img-div";
 
 
 @Component({
