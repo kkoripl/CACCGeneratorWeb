@@ -26,7 +26,7 @@
     "@ngx-translate/http-loader": "^4.0.0",
     "@ngx-translate/i18n-polyfill": "^1.0.0",
     "file-saver": "^2.0.2",
-    "jspdf": "^1.5.3",
+    "jspdf": "^2.3.1",
     "konva": "^7.2.2",
     "ngx-toastr": "^13.0.0",
     "pdfmake": "^0.1.68",
