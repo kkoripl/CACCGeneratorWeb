@@ -51,7 +51,8 @@ export const environment = {
       heightMm: 66,
       imageExt: 'image/png',
       fileExt: 'png',
-      pixelRatio: 2,
+      pixelRatio: 3,
+      quality: 1,
       compression: 'NONE'
     },
     pdfAction: {

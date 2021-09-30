@@ -194,7 +194,7 @@ export class CardsPdfGeneratorService {
 
   private addCardImageToPdf(docDefinition: jsPDF, card: Konva.Stage, cardX: number, cardY: number, cardConfig: any) {
     docDefinition.addImage({
-      imageData: card.toDataURL({mimeType: cardConfig.imageExt, pixelRatio: cardConfig.pixelRatio}),
+      imageData: card.toDataURL({mimeType: cardConfig.imageExt, pixelRatio: cardConfig.pixelRatio, quality: cardConfig.quality}),
       format: cardConfig.fileExt,
       x: cardX,
       y: cardY,

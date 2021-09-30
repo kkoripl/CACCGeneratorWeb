@@ -8,8 +8,6 @@ const routes: Routes = [
   },
   {
     path: 'custom-cards', component: CardsCreatorComponent
-  },
-  {
   }
 ];
 
