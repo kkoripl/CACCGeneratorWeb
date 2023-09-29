@@ -1,16 +1,16 @@
-import {Player} from "../models/player/player";
-import {PathsGeneratorService} from "./paths-generator.service";
-import {CardGraphicNotFoundError} from "../errors/not-found/card-graphic-not-found.error";
-import {Country} from "../../common/enums/country";
-import {FlagGraphicNotFoundError} from "../errors/not-found/flag-graphic-not-found-error";
-import {GradePosition} from "../enums/grades/grade-position.enum";
-import {GradeGraphicNotFoundError} from "../errors/not-found/grade-graphic-not-found-error";
+import { Card } from "../models/card/card";
+import { PathsGeneratorService } from "./paths-generator.service";
+import { CardGraphicNotFoundError } from "../errors/not-found/card-graphic-not-found.error";
+import { Country } from "../../common/enums/country";
+import { FlagGraphicNotFoundError } from "../errors/not-found/flag-graphic-not-found-error";
+import { GradePosition } from "../enums/grades/grade-position.enum";
+import { GradeGraphicNotFoundError } from "../errors/not-found/grade-graphic-not-found-error";
 import Konva from "konva";
-import {Injectable} from "@angular/core";
-import {environment} from '../../../environments/environment';
-import {GradesStyle} from "../enums/grades/grades-style";
-import {ReverseGraphicNotFoundError} from "../errors/not-found/reverse-graphic-not-found.error";
-import {ReverseCardStyle} from "../enums/card/reverse-card-style";
+import { Injectable } from "@angular/core";
+import { environment } from '../../../environments/environment';
+import { GradesStyle } from "../enums/grades/grades-style";
+import { ReverseGraphicNotFoundError } from "../errors/not-found/reverse-graphic-not-found.error";
+import { ReverseCardStyle } from "../enums/card/reverse-card-style";
 
 @Injectable({
   providedIn: 'root'
@@ -20,17 +20,17 @@ export class CardsPainterService {
   private cardImgConfig = environment.cardConfig.card;
   private flagImgConfig = environment.cardConfig.flag;
   private gradeImgConfig = environment.cardConfig.grade;
-  private playerNameConfig = environment.cardConfig.playerName;
+  private cardNameConfig = environment.cardConfig.cardName;
   private countryNameConfig = environment.cardConfig.countryName;
 
-  constructor(){}
+  constructor() { }
 
-  async drawCard(player: Player, gradesStyle: GradesStyle, containerName: string): Promise<Konva.Stage> {
+  async drawCard(card: Card, gradesStyle: GradesStyle, containerName: string): Promise<Konva.Stage> {
     return new Promise(resolve => {
       var stage = this.setupStage(containerName);
       var layer = new Konva.Layer();
       stage.add(layer);
-      this.drawCardFront(player, gradesStyle, layer).then(() => resolve(stage));
+      this.drawCardFront(card, gradesStyle, layer).then(() => resolve(stage));
     });
   }
 
@@ -43,51 +43,55 @@ export class CardsPainterService {
     })
   }
 
-  private async drawCardFront(player: Player, gradesStyle: GradesStyle, layer: Konva.Layer) {
+  private async drawCardFront(card: Card, gradesStyle: GradesStyle, layer: Konva.Layer) {
     await new Promise(resolve => {
-      this.drawCardImage(player, gradesStyle, layer, resolve);
+      this.drawCardImage(card, gradesStyle, layer, resolve);
     })
   }
 
   private async drawCardReverse(layer: Konva.Layer, style: ReverseCardStyle) {
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       var image = new Image();
       image.addEventListener('load', () => {
         this.addImageToLayer(layer, image, this.cardImgConfig);
         resolve();
       });
       image.src = PathsGeneratorService.generateReverseCardPath(style);
-      image.onerror = () => {throw new ReverseGraphicNotFoundError()}
+      image.onerror = () => { throw new ReverseGraphicNotFoundError() }
     })
   }
 
-  private async drawCardImage(player: Player, gradesStyle: GradesStyle, layer: Konva.Layer, resolveCallback: any) {
+  private async drawCardImage(card: Card, gradesStyle: GradesStyle, layer: Konva.Layer, resolveCallback: any) {
     var image = new Image();
     image.addEventListener('load', () => {
       this.addImageToLayer(layer, image, this.cardImgConfig);
     });
-    image.src = this.getPlayerPositionTemplatePath(player);
-    image.onerror = () => {throw new CardGraphicNotFoundError(player.position)}
+    image.src = this.getCardPositionTemplatePath(card);
+    image.onerror = () => { throw new CardGraphicNotFoundError(card.position) }
 
-    await this.drawCardElements(player, gradesStyle, layer);
+    await this.drawCardElements(card, gradesStyle, layer);
     resolveCallback();
   }
 
-  private async drawCardElements(player: Player, gradesStyle: GradesStyle, layer: Konva.Layer) {
-    await new Promise(resolve => {
-      this.drawCountryFlagKonva(player.country, layer, resolve)
-    });
-    if (player.isGoalkeeper()) {
-      await this.drawGradesKonva(player.getGoalkeeperSkills(), gradesStyle, layer);
-    } else {
-      await this.drawGradesKonva(player.getOutfielderSkills(), gradesStyle, layer);
+  private async drawCardElements(card: Card, gradesStyle: GradesStyle, layer: Konva.Layer) {
+      await new Promise(resolve => {
+        this.drawCountryFlagKonva(card.country, layer, resolve)
+      });
+    if (card.isGoalkeeper()) {
+      await this.drawGradesKonva(card.getGoalkeeperSkills(), gradesStyle, layer);
     }
-    this.drawPlayerNameKonva(player.name, layer);
-    this.drawCountryNameKonva(player.country, layer);
+    else if (card.isOutfielder()) {
+      await this.drawGradesKonva(card.getOutfielderSkills(), gradesStyle, layer);
+    }
+    else if (card.isReferee()) {
+      await this.drawGradesKonva(card.getRefereeSkills(), gradesStyle, layer);
+    }
+    this.drawCardNameKonva(card.name, layer);
+    this.drawCountryNameKonva(card.country, layer);
   }
 
-  private drawPlayerNameKonva(name: string, layer: Konva.Layer) {
-    this.addTextToLayer(layer, name, this.playerNameConfig);
+  private drawCardNameKonva(name: string, layer: Konva.Layer) {
+    this.addTextToLayer(layer, name, this.cardNameConfig);
   }
 
   private drawCountryNameKonva(country: Country, layer: Konva.Layer) {
@@ -101,14 +105,14 @@ export class CardsPainterService {
       resolveCallback();
     });
     flagImg.src = PathsGeneratorService.generateFlagPath(country.alpha2code);
-    flagImg.onerror = () => {throw new FlagGraphicNotFoundError(country);}
+    flagImg.onerror = () => { throw new FlagGraphicNotFoundError(country); }
   }
 
   private async drawGradesKonva(grades: number[], style: GradesStyle, layer: Konva.Layer) {
     var gradesPromises = [];
     for (let gradeIdx = 0; gradeIdx < grades.length; gradeIdx++) {
       gradesPromises.push(new Promise(resolve => {
-        this.drawGradeKonva(grades[gradeIdx], GradePosition.getGradePositionByOrder(gradeIdx+1), style, layer, resolve);
+        this.drawGradeKonva(grades[gradeIdx], GradePosition.getGradePositionByOrder(gradeIdx + 1), style, layer, resolve);
       }))
     }
     await Promise.all(gradesPromises);
@@ -122,7 +126,7 @@ export class CardsPainterService {
       resolveCallback();
     });
     gradeImg.src = PathsGeneratorService.generateGradesPath(grade, style);
-    gradeImg.onerror = () => {throw new GradeGraphicNotFoundError(grade);}
+    gradeImg.onerror = () => { throw new GradeGraphicNotFoundError(grade); }
   }
 
   private setupStage(containerName: string): Konva.Stage {
@@ -159,7 +163,7 @@ export class CardsPainterService {
     });
 
     while (txt.width() > textConfig.maxWidthPx) {
-      fontSize = fontSize-1;
+      fontSize = fontSize - 1;
       txt = new Konva.Text({
         x: textConfig.x,
         y: textConfig.y - fontSize,
@@ -173,11 +177,15 @@ export class CardsPainterService {
     layer.add(txt);
   }
 
-  private getPlayerPositionTemplatePath(player: Player): string {
-    if (player.isGoalkeeper()) {
+  private getCardPositionTemplatePath(card: Card): string {
+    if (card.isGoalkeeper()) {
       return PathsGeneratorService.generateGoalkeeperCardPath();
-    } else {
+    }
+    if (card.isOutfielder()) {
       return PathsGeneratorService.generateOutfielderCardPath();
+    }
+    if (card.isReferee()) {
+      return PathsGeneratorService.generateRefereeCardPath();
     }
   }
 }

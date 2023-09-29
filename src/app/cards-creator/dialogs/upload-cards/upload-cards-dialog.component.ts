@@ -7,12 +7,12 @@ import {FileExtension} from "../../../common/enums/file-extension";
 import {FileInputValidator} from "../../../common/validators/file-input.validator";
 
 @Component({
-  selector: "upload-players-dialog",
-  templateUrl: "./upload-players-dialog.component.html",
-  styleUrls: ["./upload-players-dialog.css"]
+  selector: "upload-cards-dialog",
+  templateUrl: "./upload-cards-dialog.component.html",
+  styleUrls: ["./upload-cards-dialog.css"]
 })
 
-export class UploadPlayersDialogComponent {
+export class UploadCardsDialogComponent {
 
   public uploadForm: FormGroup;
   public file;
@@ -20,7 +20,7 @@ export class UploadPlayersDialogComponent {
 
 
   constructor(private customCardsFileReaderService: CustomCardsFileReaderService,
-              private dialogRef: MatDialogRef<UploadPlayersDialogComponent>) {
+              private dialogRef: MatDialogRef<UploadCardsDialogComponent>) {
     this.buildFormConfig();
   }
 
@@ -31,7 +31,7 @@ export class UploadPlayersDialogComponent {
 
   uploadFile(countryCoding: CountryNameCodes) {
     this.customCardsFileReaderService.uploadFile(countryCoding).then(() => {
-      this.dialogRef.close({players: this.customCardsFileReaderService.players});
+      this.dialogRef.close({cards: this.customCardsFileReaderService.cards});
     });
   }
 
@@ -39,7 +39,7 @@ export class UploadPlayersDialogComponent {
     this.uploadForm = new FormGroup({
       countryCoding: new FormControl(CountryNameCodes.NAME, [Validators.required]),
       file: new FormControl("", [Validators.required,
-                                                         FileInputValidator.validType([FileExtension.XLS, FileExtension.XLSX])])
+      FileInputValidator.validType([FileExtension.XLS, FileExtension.XLSX])])
     })
   }
 

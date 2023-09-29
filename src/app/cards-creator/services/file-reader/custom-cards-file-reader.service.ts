@@ -1,33 +1,32 @@
 import {Injectable} from "@angular/core";
 import * as XLSX from "xlsx";
 
-import {Player} from "../../models/player/player";
+import {Card} from "../../models/card/card";
 import {FileReaderService} from "../../../common/services/file-reader/file-reader.service";
 import {CardFields} from "../../enums/card/cards-fields.enum";
 import {Countries} from "../../../common/enums/countries";
-import {PlayerPosition} from "../../enums/player/player-position";
+import {PersonPosition} from "../../enums/card/person-position";
 import {CountryNameCodes} from "../../../common/enums/country-name-codes";
-import {PlayersFileValidatorService} from "./players-file-validator.service";
+import {CardsFileValidatorService} from "./cards-file-validator.service";
 import {NotificationService} from "../../../common/dialogs/notifications/notification.service";
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomCardsFileReaderService extends FileReaderService {
 
-  players: Player[] = [];
+  cards: Card[] = [];
 
-  constructor(private dataValidator: PlayersFileValidatorService,
+  constructor(private dataValidator: CardsFileValidatorService,
               private notifyService: NotificationService) {
     super();
   }
 
   uploadFile(countryCoding: CountryNameCodes) {
     return new Promise((resolve, reject) => {
-      this.notifyService.showInfo("File uploading", "Uploading players file started");
+      this.notifyService.showInfo("File uploading", "Uploading cards file started");
       this.fileReader.onload = (e) => {
-        this.readPlayersDataFromXls(this.fileReader.result, countryCoding);
+        this.readCardsDataFromXls(this.fileReader.result, countryCoding);
         resolve(this.fileReader.result);
       };
 
@@ -35,59 +34,83 @@ export class CustomCardsFileReaderService extends FileReaderService {
     });
   }
 
-  private readPlayersDataFromXls(data, countryCoding: CountryNameCodes) {
+  private readCardsDataFromXls(data, countryCoding: CountryNameCodes) {
     var workbook = XLSX.read(data, {
       type: 'binary'
     });
 
-    var playersData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{header: -1});
-    for (let playerDataIdx = 0; playerDataIdx < playersData.length; playerDataIdx++) {
-      var playerData = playersData[playerDataIdx];
-      this.dataValidator.findErrorsInPlayerData(playerData, countryCoding, playerDataIdx+1);
-      this.players.push(this.buildPlayerObject(playerData, countryCoding, playerDataIdx+1));
+    var cardsData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]],{header: -1});
+    for (let cardDataIdx = 0; cardDataIdx < cardsData.length; cardDataIdx++) {
+      var cardData = cardsData[cardDataIdx];
+      this.dataValidator.findErrorsInCardData(cardData, countryCoding, cardDataIdx+1);
+      this.cards.push(this.buildCardObject(cardData, countryCoding, cardDataIdx+1));
     }
   }
 
-  private buildPlayerObject(playerData: any, countryCoding: CountryNameCodes, row: number): Player {
-    if (this.dataValidator.hasGoalkeeperAttributes(playerData)) {
-      return this.buildGoalkeeperObject(playerData, countryCoding);
-    } else {
-      this.dataValidator.checkOutfielderDataErrors(playerData, row);
-      return this.buildOutfielderObject(playerData, countryCoding);
+  private buildCardObject(cardData: any, countryCoding: CountryNameCodes, row: number): Card {
+    if (this.dataValidator.hasGoalkeeperAttributes(cardData)) {
+      return this.buildGoalkeeperObject(cardData, countryCoding);
+    }
+    if(this.dataValidator.hasOutfielderAttributes(cardData)) {
+      this.dataValidator.checkOutfielderDataErrors(cardData, row);
+      return this.buildOutfielderObject(cardData, countryCoding);
+    }
+    if(this.dataValidator.hasRefereeAttributes(cardData)) {
+      return this.buildRefereeObject(cardData, countryCoding);
     }
   }
 
-  private buildGoalkeeperObject(playerData: object, countryCoding: CountryNameCodes): Player {
-    return new Player(
-      playerData[CardFields.NAME],
-      Countries.getCountryBy(playerData[CardFields.COUNTRY], countryCoding),
-      PlayerPosition.GOALKEEPER,
-      playerData[CardFields.PACE],
-      playerData[CardFields.DRIBBLING],
+  private buildGoalkeeperObject(cardData: object, countryCoding: CountryNameCodes): Card {
+    return new Card(
+      cardData[CardFields.NAME],
+      Countries.getCountryBy(cardData[CardFields.COUNTRY], countryCoding),
+      PersonPosition.GOALKEEPER,
+      cardData[CardFields.PACE],
+      cardData[CardFields.DRIBBLING],
       undefined,
-      playerData[CardFields.HIGH_PASS],
-      playerData[CardFields.RESILIENCE],
+      cardData[CardFields.HIGH_PASS],
+      cardData[CardFields.RESILIENCE],
       undefined,
       undefined,
-      playerData[CardFields.SAVING],
-      playerData[CardFields.AERIAL_ABILITY],
-      playerData[CardFields.HANDLING]);
+      cardData[CardFields.SAVING],
+      cardData[CardFields.AERIAL_ABILITY],
+      cardData[CardFields.HANDLING],
+      cardData[CardFields.LENIENCY]);
   }
 
-  private buildOutfielderObject(playerData: object, countryCoding: CountryNameCodes): Player {
-      return new Player(
-        playerData[CardFields.NAME],
-        Countries.getCountryBy(playerData[CardFields.COUNTRY], countryCoding),
-        PlayerPosition.OUTFIELDER,
-        playerData[CardFields.PACE],
-        playerData[CardFields.DRIBBLING],
-        playerData[CardFields.HEADING],
-        playerData[CardFields.HIGH_PASS],
-        playerData[CardFields.RESILIENCE],
-        playerData[CardFields.SHOOTING],
-        playerData[CardFields.TACKLING],
+  private buildOutfielderObject(cardData: object, countryCoding: CountryNameCodes): Card {
+      return new Card(
+        cardData[CardFields.NAME],
+        Countries.getCountryBy(cardData[CardFields.COUNTRY], countryCoding),
+        PersonPosition.OUTFIELDER,
+        cardData[CardFields.PACE],
+        cardData[CardFields.DRIBBLING],
+        cardData[CardFields.HEADING],
+        cardData[CardFields.HIGH_PASS],
+        cardData[CardFields.RESILIENCE],
+        cardData[CardFields.SHOOTING],
+        cardData[CardFields.TACKLING],
+        undefined,
         undefined,
         undefined,
         undefined);
+    }
+
+    private buildRefereeObject(cardData: object, countryCoding: CountryNameCodes): Card {
+      return new Card(
+        cardData[CardFields.NAME],
+        Countries.getCountryBy(cardData[CardFields.COUNTRY], countryCoding),
+        PersonPosition.REFEREE,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        cardData[CardFields.LENIENCY]);
     }
 }

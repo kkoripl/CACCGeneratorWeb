@@ -1,6 +1,6 @@
-export class ReadXlsPlayerError implements Error {
+export class ReadXlsCardError implements Error {
   message: string;
-  name: string = 'Error during player file uploading';
+  name: string = 'Error during card file uploading';
   stack: string;
 
   createMessage(cause: string, row: number): string {
