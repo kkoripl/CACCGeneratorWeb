@@ -30,7 +30,7 @@ export class CardsCreatorComponent implements OnInit {
   public CardImgDiv = CardImgDiv;
 
   displayedColumns: string[] = ['name', 'country', 'pace', 'dribbling', 'heading', 'highPass', 'resilience', 'shooting',
-    'tackling', 'saving', 'aerialAbility', 'handling', 'actions', 'leniency'];
+    'tackling', 'saving', 'aerialAbility', 'handling', 'leniency', 'actions'];
 
   exampleExcelConfig = environment.exampleExcelConfig;
 

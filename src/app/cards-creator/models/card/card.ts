@@ -4,9 +4,7 @@ import {PersonPosition as PersonPosition} from "../../enums/card/person-position
 export class Card {
   name: string
   country: Country;
-
   position: PersonPosition;
-
   pace: number
   dribbling: number
   heading: number
@@ -14,11 +12,9 @@ export class Card {
   resilience: number
   shooting: number
   tackling: number
-
   saving: number
   aerialAbility: number
   handling: number
-
   leniency: number
 
   constructor(name: string, country: Country, position: PersonPosition, pace: number, dribbling: number, heading: number,
@@ -54,7 +50,7 @@ export class Card {
     this.aerialAbility = card.goalkeeper.aerialAbility;
     this.handling = card.goalkeeper.handling;
     this.position = card.general.position;
-    this.leniency = card.general.leniency;
+    this.leniency = card.referee.leniency;
   }
 
   isGoalkeeper(): boolean {
