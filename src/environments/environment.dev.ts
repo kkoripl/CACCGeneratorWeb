@@ -20,7 +20,7 @@ export const environment = {
       widthPx: 20,
       heightPx: 19
     },
-    playerName: {
+    cardName: {
       x: 27,
       y: 40,
       fontName: 'Komika Axis',

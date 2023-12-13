@@ -22,8 +22,8 @@ import {MatListModule} from "@angular/material/list";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
-import {PlayerDialogComponent} from "./dialogs/new-player/player-dialog.component";
-import {UploadPlayersDialogComponent} from "./dialogs/upload-players/upload-players-dialog.component";
+import {CardDialogComponent} from "./dialogs/new-card/card-dialog.component";
+import {UploadCardsDialogComponent} from "./dialogs/upload-cards/upload-cards-dialog.component";
 import {FilterCountryPipe} from "./pipes/filter-country.pipe";
 import {OrderByPipe} from "../common/pipes/order-by.pipe";
 import {GeneralErrorHandler} from "../common/error/error-handler/general-error-handler";
@@ -32,8 +32,8 @@ import {CardsCreatorComponent} from "./cards-creator.component";
 @NgModule({
   declarations: [
     CardsCreatorComponent,
-    PlayerDialogComponent,
-    UploadPlayersDialogComponent,
+    CardDialogComponent,
+    UploadCardsDialogComponent,
     OrderByPipe,
     FilterCountryPipe
   ],
@@ -65,4 +65,4 @@ import {CardsCreatorComponent} from "./cards-creator.component";
     }],
   bootstrap: []
 })
-export class CardsCreatorModule { }
+export class CardsCreatorModule {}

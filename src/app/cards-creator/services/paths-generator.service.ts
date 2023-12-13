@@ -1,4 +1,4 @@
-import {PlayerPosition} from "../enums/player/player-position";
+import {PersonPosition} from "../enums/card/person-position";
 import {GradesStyle} from "../enums/grades/grades-style";
 import {ReverseCardStyle} from "../enums/card/reverse-card-style";
 
@@ -27,11 +27,15 @@ export class PathsGeneratorService {
   }
 
   public static generateOutfielderCardPath(): string {
-    return this.generateCardPath(PlayerPosition.OUTFIELDER.valueOf());
+    return this.generateCardPath(PersonPosition.OUTFIELDER.valueOf());
   }
 
   public static generateGoalkeeperCardPath(): string {
-    return this.generateCardPath(PlayerPosition.GOALKEEPER.valueOf());
+    return this.generateCardPath(PersonPosition.GOALKEEPER.valueOf());
+  }
+
+  public static generateRefereeCardPath(): string {
+    return this.generateCardPath(PersonPosition.REFEREE.valueOf());
   }
 
   public static generateReverseCardPath(style: ReverseCardStyle): string {

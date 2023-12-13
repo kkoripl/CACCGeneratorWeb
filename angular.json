@@ -135,5 +135,8 @@
       }
     }
   },
-  "defaultProject": "cacc-web-frontend"
+  "defaultProject": "cacc-web-frontend",
+  "cli": {
+    "analytics": false
+  }
 }

@@ -1,15 +1,15 @@
 import {Component, OnInit} from '@angular/core';
 import * as fileSaver from 'file-saver';
-import {Player} from "./models/player/player";
+import {Card} from "./models/card/card";
 import {CustomCardsFileReaderService} from "./services/file-reader/custom-cards-file-reader.service";
 import {MatTableDataSource} from "@angular/material/table";
 import {Countries} from "../common/enums/countries";
 import {Country} from "../common/enums/country";
 import {MatDialog} from "@angular/material/dialog";
-import {PlayerDialogComponent} from "./dialogs/new-player/player-dialog.component";
-import {PlayerPosition} from "./enums/player/player-position";
+import {CardDialogComponent} from "./dialogs/new-card/card-dialog.component";
+import {PersonPosition} from "./enums/card/person-position";
 import {CardsPdfGeneratorService} from "./services/cards-pdf-generator.service";
-import {UploadPlayersDialogComponent} from "./dialogs/upload-players/upload-players-dialog.component";
+import {UploadCardsDialogComponent} from "./dialogs/upload-cards/upload-cards-dialog.component";
 import {NotificationService} from "../common/dialogs/notifications/notification.service";
 import {FileDownloadService} from "./services/file-download.service";
 import {CardsPainterService} from "./services/cards-painter.service";
@@ -30,18 +30,18 @@ export class CardsCreatorComponent implements OnInit {
   public CardImgDiv = CardImgDiv;
 
   displayedColumns: string[] = ['name', 'country', 'pace', 'dribbling', 'heading', 'highPass', 'resilience', 'shooting',
-    'tackling', 'saving', 'aerialAbility', 'handling', 'actions'];
+    'tackling', 'saving', 'aerialAbility', 'handling', 'leniency', 'actions'];
 
   exampleExcelConfig = environment.exampleExcelConfig;
 
-  players = new MatTableDataSource;
-  data: Player[] = [];
+  cards = new MatTableDataSource;
+  data: Card[] = [];
   countries: Country[] = Countries.all;
   gradesStyle: GradesStyle;
   reverseStyle: ReverseCardStyle;
   addReverses: boolean;
   settingsMenuShown: boolean;
-  lastSelectedPlayer: Player;
+  lastSelectedCard: Card;
 
   constructor(private customCardsFileReaderService: CustomCardsFileReaderService,
               private cardsPainter: CardsPainterService,
@@ -49,29 +49,29 @@ export class CardsCreatorComponent implements OnInit {
               private dialog: MatDialog,
               private notifyService: NotificationService,
               private fileDownloadService: FileDownloadService) {
-    this.gradesStyle = GradesStyle.HEX;
-    this.reverseStyle = ReverseCardStyle.CLASSIC;
-    this.addReverses = false;
+    this.gradesStyle = GradesStyle.CIRCLE;
+    this.reverseStyle = ReverseCardStyle.WITH_BALL;
+    this.addReverses = true;
     this.settingsMenuShown = false;
   }
 
   ngOnInit(): void {}
 
-  private selectPlayer (player: Player) {
-    this.lastSelectedPlayer = player;
+  private selectCard(card: Card) {
+    this.lastSelectedCard = card;
   }
 
-  drawCard(player: Player) {
-    this.selectPlayer(player);
-    this.drawFront(player);
+  drawCard(card: Card) {
+    this.selectCard(card);
+    this.drawFront(card);
     if (this.addReverses) {
       this.drawReverse();
     }
   }
 
-  drawFront(player: Player) {
-    if (player) {
-      this.cardsPainter.drawCard(player, this.gradesStyle, CardImgDiv.CARD_FRONT_PREVIEW);
+  drawFront(card: Card) {
+    if (card) {
+      this.cardsPainter.drawCard(card, this.gradesStyle, CardImgDiv.CARD_FRONT_PREVIEW);
     }
   }
 
@@ -84,57 +84,57 @@ export class CardsCreatorComponent implements OnInit {
     this.cardPdfGenerator.generatePdf(this.data, this.gradesStyle, this.addReverses, this.reverseStyle);
   }
 
-  deletePlayer(playerToDelete: Player) {
-    const playerToDeleteIdx = this.data.findIndex(player => player === playerToDelete);
-    this.data.splice(playerToDeleteIdx, 1);
-    this.players.data = this.data;
+  deleteCard(cardToDelete: Card) {
+    const cardToDeleteIdx = this.data.findIndex(card => card === cardToDelete);
+    this.data.splice(cardToDeleteIdx, 1);
+    this.cards.data = this.data;
   }
 
   openUploadFileDialog() {
-    const dialogRef = this.dialog.open(UploadPlayersDialogComponent, {});
+    const dialogRef = this.dialog.open(UploadCardsDialogComponent, {});
     dialogRef.afterClosed().subscribe(result => {
       if(result != null) {
-            this.data = result.players;
-            this.players.data = this.data;
+            this.data = result.cards;
+            this.cards.data = this.data;
       }
     })
   }
 
-  openAddingPlayerDialog(data: any) {
-    data.player = new Player(undefined, undefined, PlayerPosition.GOALKEEPER, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
-    data.action = "Add player";
-    const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
+  openAddingCardDialog(data: any) {
+    data.card = new Card(undefined, undefined, PersonPosition.OUTFIELDER, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+    data.action = "Add Card";
+    const dialogRef = this.dialog.open(CardDialogComponent, {data: data});
     dialogRef.afterClosed().subscribe(result => {
       if(result != undefined && result.event != undefined) {
-        data.player.updatePlayer(result.player);
-        this.addPlayer(data.player);
-        this.selectPlayer(data.player);
-        this.drawFront(data.player);
+        data.card.updateCard(result.card);
+        this.addCard(data.card);
+        this.selectCard(data.card);
+        this.drawFront(data.card);
       }
     });
   }
 
-  openEditPlayerDialog(player: Player) {
-    let data = {player: null, action: null};
-    data.player = player;
-    data.action = "Edit player";
-    const dialogRef = this.dialog.open(PlayerDialogComponent, {data: data});
+  openEditCardDialog(card: Card) {
+    let data = {card: null, action: null};
+    data.card = card;
+    data.action = "Edit card";
+    const dialogRef = this.dialog.open(CardDialogComponent, {data: data});
     dialogRef.afterClosed().subscribe(result => {
       if(result != undefined) {
-        player.updatePlayer(result.player);
-        this.selectPlayer(player);
-        this.drawFront(player);
+        card.updateCard(result.card);
+        this.selectCard(card);
+        this.drawFront(card);
       }
     });
   }
 
-  addPlayer(playerToAdd: any) {
-    var newPlayer = new Player(playerToAdd.name, playerToAdd.country, playerToAdd.position, playerToAdd.pace,
-      playerToAdd.dribbling, playerToAdd.heading, playerToAdd.highPass, playerToAdd.resilience, playerToAdd.shooting,
-      playerToAdd.tackling, playerToAdd.saving, playerToAdd.aerialAbility, playerToAdd.handling);
+  addCard(cardToAdd: any) {
+    var newCard = new Card(cardToAdd.name, cardToAdd.country, cardToAdd.position, cardToAdd.pace,
+      cardToAdd.dribbling, cardToAdd.heading, cardToAdd.highPass, cardToAdd.resilience, cardToAdd.shooting,
+      cardToAdd.tackling, cardToAdd.saving, cardToAdd.aerialAbility, cardToAdd.handling, cardToAdd.leniency);
 
-    this.data.push(newPlayer);
-    this.players.data = this.data;
+    this.data.push(newCard);
+    this.cards.data = this.data;
   }
 
   showSettingsMenu() {
@@ -152,15 +152,15 @@ export class CardsCreatorComponent implements OnInit {
       })
   }
 
-  arePlayersToGenerate(): boolean {
-    return Array.isArray(this.players.data) && this.players.data.length != 0;
+  areCardsToGenerate(): boolean {
+    return Array.isArray(this.cards.data) && this.cards.data.length != 0;
   }
 
   getInstructionText(): string {
-    return "1. Add new player via 'Add' button or upload .xls/.xlsx file with players. Download example XLS file and change player names, skills and countries which can be named by name, alpha-2 or alpha-3 code in country column. All possible countries are in 'countries' sheet.\n\n" +
-      "2. Preview each added player by clicking on its row in the table!\n\n" +
+    return "1. Add new card via 'Add' button or upload .xls/.xlsx file with cards. Download example XLS file and change card names, skills and countries which can be named by name, alpha-2 or alpha-3 code in country column. All possible countries are in 'countries' sheet.\n\n" +
+      "2. Preview each added card by clicking on its row in the table!\n\n" +
       "3. Try to customize cards with options available under 'Card settings' button.\n\n" +
-      "4. Edit or delete players using action buttons on the right side of the table.\n\n" +
+      "4. Edit or delete cards using action buttons on the right side of the table.\n\n" +
       "5. Generate pdf and print your cards!";
   }
 }

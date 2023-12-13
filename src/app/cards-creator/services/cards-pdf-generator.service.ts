@@ -3,13 +3,13 @@ import Konva from "konva";
 
 import {Injectable} from "@angular/core";
 import {environment} from '../../../environments/environment';
-import {Player} from "../models/player/player";
+import {Card} from "../models/card/card";
 import {BrowserService} from "../../common/services/browser/browser.service";
 import {CardsPainterService} from "./cards-painter.service";
 import {GradesStyle} from "../enums/grades/grades-style";
 import {ReverseCardStyle} from "../enums/card/reverse-card-style";
 import {CardImgDiv} from "../enums/card-img-div";
-
+import datauristring from "jspdf";
 
 @Injectable({
   providedIn: 'root'
@@ -25,21 +25,21 @@ export class CardsPdfGeneratorService {
               private browserService: BrowserService) {
   }
 
-  generatePdf(players: Player[], gradesStyle: GradesStyle, addReverses: boolean, reverseStyle: ReverseCardStyle) {
+  generatePdf(cards: Card[], gradesStyle: GradesStyle, addReverses: boolean, reverseStyle: ReverseCardStyle) {
     let doc = new jsPDF(); // A4 size page of PDF
 
-    this.addCards(doc, players, gradesStyle, addReverses, reverseStyle, this.structureConfig, this.cardConfig)
+    this.addCards(doc, cards, gradesStyle, addReverses, reverseStyle, this.structureConfig, this.cardConfig)
       .then(pdf => {
         this.setupPdfMetadata(pdf);
         if (this.browserService.isBrowserWithPopupsSecurity()) {
           this.renderPdfInNewWindow(pdf);
         } else {
-          pdf.output(this.pdfActionConfig.type);
+          pdf.output('dataurlnewwindow');
         }
       });
   }
 
-  private async addCards(docDefinition: jsPDF, players: Player[], gradesStyle: GradesStyle, reversesNeeded: boolean, reverseStyle: ReverseCardStyle, structureConfig, cardConfig) {
+  private async addCards(docDefinition: jsPDF, cards: Card[], gradesStyle: GradesStyle, reversesNeeded: boolean, reverseStyle: ReverseCardStyle, structureConfig, cardConfig) {
     var firstCardOnPage = false;
     var cardInRowIdx = 0;
     var cardsLeft = 0
@@ -48,7 +48,7 @@ export class CardsPdfGeneratorService {
     var cardX = structureConfig.firstCardXMm;
     var cardY = structureConfig.firstCardYMm;
 
-    for (let cardIdx = 0; cardIdx < players.length; cardIdx++) {
+    for (let cardIdx = 0; cardIdx < cards.length; cardIdx++) {
       firstCardOnPage = false;
       cardInRowIdx = this.calcCardInRowIdx(cardIdx, structureConfig.rowSize);
 
@@ -58,7 +58,7 @@ export class CardsPdfGeneratorService {
         }
 
         if (reversesNeeded) {
-          cardsLeft = this.calcCardsLeft(players.length, cardIdx);
+          cardsLeft = this.calcCardsLeft(cards.length, cardIdx);
           reversesToAdd = this.calcHowManyReversesToAdd(cardsLeft, structureConfig.pageSize);
           await this.addReverses(docDefinition, reverseStyle, reversesToAdd, structureConfig, cardConfig);
         }
@@ -76,15 +76,15 @@ export class CardsPdfGeneratorService {
         cardY = this.startNewRow(cardY, structureConfig.cardsRowStartsDistMm);
       }
       cardX = this.calcCardFrontXInPositionOfIdx(structureConfig.firstCardXMm, cardInRowIdx, structureConfig.cardsColStartsDistMm);
-      await this.placeCardInPdf(docDefinition, players[cardIdx], gradesStyle, cardX, cardY, cardConfig);
+      await this.placeCardInPdf(docDefinition, cards[cardIdx], gradesStyle, cardX, cardY, cardConfig);
     }
 
     return docDefinition;
   }
 
-  private async placeCardInPdf(docDefinition: jsPDF, player: Player, gradesStyle: GradesStyle, cardX: number, cardY: number, cardConfig) {
-    return new Promise(resolve => {
-      this.cardsPainterService.drawCard(player, gradesStyle, CardImgDiv.PDF_CARD_FRONT)
+  private async placeCardInPdf(docDefinition: jsPDF, card: Card, gradesStyle: GradesStyle, cardX: number, cardY: number, cardConfig) {
+    return new Promise<void>(resolve => {
+      this.cardsPainterService.drawCard(card, gradesStyle, CardImgDiv.PDF_CARD_FRONT)
         .then((card) => {
           this.addCardImageToPdf(docDefinition, card, cardX, cardY, cardConfig);
           resolve();
@@ -120,7 +120,7 @@ export class CardsPdfGeneratorService {
   }
 
   private async addReverse(docDefinition: jsPDF, style: ReverseCardStyle, x: number, y: number, cardConfig) {
-    return new Promise(resolve => {
+    return new Promise<jsPDF>(resolve => {
       this.cardsPainterService.drawReverse( style, CardImgDiv.PDF_CARD_REVERSE)
         .then((reverse) => {
           this.addCardImageToPdf(docDefinition, reverse, x, y, cardConfig);
@@ -171,13 +171,13 @@ export class CardsPdfGeneratorService {
   }
 
   private setupPdfMetadata(docDefinition: jsPDF) {
-    var properties = this.metadataConfig;
-    docDefinition.setProperties({properties});
+    const properties = this.metadataConfig;
+    docDefinition.setProperties(properties);
   }
 
   private renderPdfInNewWindow(docDefinition: jsPDF) {
     var newWindow = window.open('/');
-    fetch(docDefinition.output(this.pdfActionConfig.popupsSecurity))
+    fetch(docDefinition.output('datauristring'))
       .then(res => res.blob())
       .then(blob => {
         newWindow.location.href = URL.createObjectURL(blob);
@@ -198,8 +198,8 @@ export class CardsPdfGeneratorService {
       format: cardConfig.fileExt,
       x: cardX,
       y: cardY,
-      w: cardConfig.widthMm,
-      h: cardConfig.heightMm,
+      width: cardConfig.widthMm,
+      height: cardConfig.heightMm,
       compression: cardConfig.compression});
   }
 }
